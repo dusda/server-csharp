@@ -16,7 +16,7 @@ namespace SPTarkov.Server.Core.Utils;
 [Injectable(InjectionType.Singleton)]
 public class JsonUtil
 {
-  static JsonSerializerOptions jsonSerializerOptionsNoIndent = new()
+  static JsonSerializerOptions _jsonSerializerOptionsNoIndent = new()
   {
     WriteIndented = false,
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -66,7 +66,7 @@ public class JsonUtil
         }
   };
 
-  protected static JsonSerializerOptions jsonSerializerOptionsIndented = new(jsonSerializerOptionsNoIndent)
+  protected static JsonSerializerOptions jsonSerializerOptionsIndented = new(_jsonSerializerOptionsNoIndent)
   {
     WriteIndented = true
   };
@@ -79,7 +79,7 @@ public class JsonUtil
   /// <returns>Deserialized object or null</returns>
   public T? Deserialize<T>(string? json)
   {
-    return string.IsNullOrEmpty(json) ? default : JsonSerializer.Deserialize<T>(json, jsonSerializerOptionsNoIndent);
+    return string.IsNullOrEmpty(json) ? default : JsonSerializer.Deserialize<T>(json, _jsonSerializerOptionsNoIndent);
   }
 
   /// <summary>
@@ -90,7 +90,7 @@ public class JsonUtil
   /// <returns></returns>
   public object? Deserialize(string? json, Type type)
   {
-    return string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize(json, type, jsonSerializerOptionsNoIndent);
+    return string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize(json, type, _jsonSerializerOptionsNoIndent);
   }
 
   /// <summary>
@@ -107,7 +107,7 @@ public class JsonUtil
 
     using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
     {
-      return JsonSerializer.Deserialize<T>(fs, jsonSerializerOptionsNoIndent);
+      return JsonSerializer.Deserialize<T>(fs, _jsonSerializerOptionsNoIndent);
     }
   }
 
@@ -126,7 +126,7 @@ public class JsonUtil
 
     using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
     {
-      return JsonSerializer.Deserialize(fs, type, jsonSerializerOptionsNoIndent);
+      return JsonSerializer.Deserialize(fs, type, _jsonSerializerOptionsNoIndent);
     }
   }
 
@@ -138,7 +138,7 @@ public class JsonUtil
   /// <returns></returns>
   public object? DeserializeFromFileStream(FileStream fs, Type type)
   {
-    return JsonSerializer.Deserialize(fs, type, jsonSerializerOptionsNoIndent);
+    return JsonSerializer.Deserialize(fs, type, _jsonSerializerOptionsNoIndent);
   }
 
   /// <summary>
@@ -150,7 +150,7 @@ public class JsonUtil
   /// <returns>Serialised object as JSON, or null</returns>
   public string? Serialize<T>(T? obj, bool indented = false)
   {
-    return obj == null ? null : JsonSerializer.Serialize(obj, indented ? jsonSerializerOptionsIndented : jsonSerializerOptionsNoIndent);
+    return obj == null ? null : JsonSerializer.Serialize(obj, indented ? jsonSerializerOptionsIndented : _jsonSerializerOptionsNoIndent);
   }
 
   /// <summary>
@@ -162,7 +162,7 @@ public class JsonUtil
   /// <returns>Serialized text</returns>
   public string? Serialize(object? obj, Type type, bool indented = false)
   {
-    return obj == null ? null : JsonSerializer.Serialize(obj, type, indented ? jsonSerializerOptionsIndented : jsonSerializerOptionsNoIndent);
+    return obj == null ? null : JsonSerializer.Serialize(obj, type, indented ? jsonSerializerOptionsIndented : _jsonSerializerOptionsNoIndent);
   }
 
   protected static void AddConverter(JsonSerializerOptions options, JsonConverter newConverter)
@@ -182,15 +182,15 @@ public class JsonUtil
   {
     // This might actually be a terrible thing to do, but it is what it is for now
 
-    if (!jsonSerializerOptionsNoIndent.IsReadOnly)
+    if (!_jsonSerializerOptionsNoIndent.IsReadOnly)
     {
-      AddConverter(jsonSerializerOptionsNoIndent, converter);
+      AddConverter(_jsonSerializerOptionsNoIndent, converter);
     }
     else
     {
-      var noIndentConverter = new JsonSerializerOptions(jsonSerializerOptionsNoIndent);
+      var noIndentConverter = new JsonSerializerOptions(_jsonSerializerOptionsNoIndent);
       AddConverter(noIndentConverter, converter);
-      jsonSerializerOptionsNoIndent = noIndentConverter;
+      _jsonSerializerOptionsNoIndent = noIndentConverter;
     }
 
     if (!jsonSerializerOptionsIndented.IsReadOnly)

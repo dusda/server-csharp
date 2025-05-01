@@ -15,9 +15,9 @@ namespace SPTarkov.Server.Core.Utils;
 [Injectable(InjectionType.Singleton, InjectableTypeOverride = typeof(IOnLoad), TypePriority = OnLoadOrder.Database)]
 public class DatabaseImporter : IOnLoad
 {
-  const string _sptDataPath = "./Assets/";
-  readonly HttpConfig httpConfig;
-  readonly ValidationResult valid = ValidationResult.UNDEFINED;
+  const string SptDataPath = "./Assets/";
+  readonly HttpConfig _httpConfig;
+  readonly ValidationResult _valid = ValidationResult.UNDEFINED;
   protected ConfigServer _configServer;
 
   protected DatabaseServer _databaseServer;
@@ -55,7 +55,7 @@ public class DatabaseImporter : IOnLoad
     _configServer = configServer;
     _fileUtil = fileUtil;
     _imageRouter = imageRouter;
-    httpConfig = _configServer.GetConfig<HttpConfig>();
+    _httpConfig = _configServer.GetConfig<HttpConfig>();
   }
 
   public async Task OnLoad()
@@ -101,7 +101,7 @@ public class DatabaseImporter : IOnLoad
    */
   public string GetSptDataPath()
   {
-    return _sptDataPath;
+    return SptDataPath;
   }
 
   void CreateRouteMapping(string directory, string newBasePath)
@@ -166,7 +166,7 @@ public class DatabaseImporter : IOnLoad
 
     dataToImport.Traders = tempTraders;
 
-    var validation = valid == ValidationResult.FAILED || valid == ValidationResult.NOT_FOUND ? "." : "";
+    var validation = _valid == ValidationResult.FAILED || _valid == ValidationResult.NOT_FOUND ? "." : "";
     _logger.Info($"{_localisationService.GetText("importing_database_finish")}{validation}");
     this._logger.Debug($"Database import took {timer.ElapsedMilliseconds}ms");
     _databaseServer.SetTables(dataToImport);
@@ -221,7 +221,7 @@ public class DatabaseImporter : IOnLoad
     for (var i = 0; i < directories.Length; i++)
     {
       // Get all files in directory
-      var filesInDirectory = _fileUtil.GetFiles(directories[i]);
+      var filesInDirectory = Directory.GetFiles($"{filepath}{directories[i]}");
       foreach (var file in filesInDirectory)
       {
         var imagePath = file;
@@ -256,7 +256,7 @@ public class DatabaseImporter : IOnLoad
    */
   protected string? GetImagePathOverride(string imagePath)
   {
-    if (httpConfig.ServerImagePathOverride.TryGetValue(imagePath, out var value))
+    if (_httpConfig.ServerImagePathOverride.TryGetValue(imagePath, out var value))
     {
       return value;
     }

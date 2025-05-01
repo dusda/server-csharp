@@ -56,7 +56,7 @@ public class ImporterUtil
     var result = Activator.CreateInstance(loadedType);
 
     // get all filepaths
-    var files = _fileUtil.GetFiles(filepath);
+    var files = _fileUtil.GetFiles(new DirectoryInfo(filepath));
     var directories = _fileUtil.GetDirectories(filepath);
 
     // Process files

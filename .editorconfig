@@ -94,7 +94,6 @@ dotnet_style_prefer_conditional_expression_over_return = true:silent
 csharp_prefer_simple_default_expression = true:suggestion
 
 # Expression-bodied members
-csharp_style_expression_bodied_methods = false:warning
 csharp_style_expression_bodied_constructors = false:warning
 csharp_style_expression_bodied_operators = false:warning
 csharp_style_expression_bodied_properties = false:warning

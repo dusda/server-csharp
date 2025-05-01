@@ -1,4 +1,5 @@
 using System.Runtime;
+using HarmonyLib;
 using Serilog;
 using Serilog.Exceptions;
 using SPTarkov.Common.Semver;
@@ -64,14 +65,23 @@ try
     var modLoader = provider.GetService<ModLoader>()!;
     var modValidator = provider.GetService<ModValidator>()!;
     var mods = modLoader.LoadMods();
-    // validate and sort mods, this will also discard any mods that are invalid
-    var sortedLoadedMods = modValidator.ValidateAndSort(mods);
+    mods = modValidator.ValidateAndSort(mods);
+
     // for harmony, we use the original list, as some mods may only be bepinex patches only
-    HarmonyBootstrapper.LoadAllPatches([.. mods.SelectMany(asm => asm.Assemblies)]);
+    var harmony = new Harmony("SPT");
+    foreach (var assembly in mods.SelectMany(asm => asm.Assemblies))
+      try
+      {
+        harmony.PatchAll(assembly);
+      }
+      catch (Exception e)
+      {
+        logger.LogError(e, "Failed to patch assembly {Assembly}", assembly.FullName);
+      }
 
     // register mod components from the filtered list
     DependencyInjectionRegistrator
-      .RegisterModOverrideComponents(builder.Services, [.. sortedLoadedMods.SelectMany(a => a.Assemblies)]);
+      .RegisterModOverrideComponents(builder.Services, [.. mods.SelectMany(a => a.Assemblies)]);
 
     // Add the Loaded Mod Assemblies for later
     context.AddValue(ContextVariableType.LOADED_MOD_ASSEMBLIES, mods);

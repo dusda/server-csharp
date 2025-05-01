@@ -14,7 +14,16 @@ using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 namespace SPTarkov.Server.Core.Servers.Http;
 
 [Injectable]
-public class SptHttpListener : IHttpListener
+public class SptHttpListener(
+    HttpRouter httpRouter,
+    IEnumerable<ISerializer> serializers,
+    ISptLogger<SptHttpListener> logger,
+    ISptLogger<RequestLogger> requestsLogger,
+    JsonUtil jsonUtil,
+    HttpResponseUtil httpHttpResponseUtil,
+    LocalisationService localisationService,
+    ServerSettings settings
+  ) : IHttpListener
 {
   // we want to reserve on the list 512KB capacity before it needs to expand, should be enough for most requests
   const int InitialCapacityForListBuffer = 1024 * 512;
@@ -22,39 +31,21 @@ public class SptHttpListener : IHttpListener
   // We want to read 1KB at a time, for most request this is already big enough
   const int BodyReadBufferSize = 1024 * 1;
 
-  static readonly ImmutableHashSet<string> SupportedMethods = ["GET", "PUT", "POST"];
-  protected readonly HttpResponseUtil _httpResponseUtil;
-  protected readonly JsonUtil _jsonUtil;
-  protected readonly LocalisationService _localisationService;
-  protected readonly ISptLogger<SptHttpListener> _logger;
-  protected readonly ISptLogger<RequestLogger> _requestLogger;
+  static readonly ImmutableHashSet<string> _supportedMethods = ["GET", "PUT", "POST"];
+  protected readonly HttpResponseUtil _httpResponseUtil = httpHttpResponseUtil;
+  protected readonly JsonUtil _jsonUtil = jsonUtil;
+  protected readonly LocalisationService _localisationService = localisationService;
+  private readonly ServerSettings _settings = settings;
+  protected readonly ISptLogger<SptHttpListener> _logger = logger;
+  protected readonly ISptLogger<RequestLogger> _requestLogger = requestsLogger;
 
 
-  protected readonly HttpRouter _router;
-  protected readonly IEnumerable<ISerializer> _serializers;
-
-  public SptHttpListener(
-      HttpRouter httpRouter,
-      IEnumerable<ISerializer> serializers,
-      ISptLogger<SptHttpListener> logger,
-      ISptLogger<RequestLogger> requestsLogger,
-      JsonUtil jsonUtil,
-      HttpResponseUtil httpHttpResponseUtil,
-      LocalisationService localisationService
-  )
-  {
-    _router = httpRouter;
-    _serializers = serializers;
-    _logger = logger;
-    _requestLogger = requestsLogger;
-    _httpResponseUtil = httpHttpResponseUtil;
-    _localisationService = localisationService;
-    _jsonUtil = jsonUtil;
-  }
+  protected readonly HttpRouter _router = httpRouter;
+  protected readonly IEnumerable<ISerializer> _serializers = serializers;
 
   public bool CanHandle(string _, HttpRequest req)
   {
-    return SupportedMethods.Contains(req.Method);
+    return _supportedMethods.Contains(req.Method);
   }
 
   public void Handle(string sessionId, HttpRequest req, HttpResponse resp)
@@ -146,10 +137,7 @@ public class SptHttpListener : IHttpListener
       string output
   )
   {
-    if (body == null)
-    {
-      body = new object();
-    }
+    body ??= new object();
 
     var bodyInfo = _jsonUtil.Serialize(body);
 
@@ -198,11 +186,10 @@ public class SptHttpListener : IHttpListener
   /// <param name="output"> Output string </param>
   protected void LogRequest(HttpRequest req, string output)
   {
-    if (ProgramStatics.ENTRY_TYPE() != EntryType.RELEASE)
-    {
-      var log = new Response(req.Method, output.Substring(0, Math.Min(output.Length, 2000)));
-      _requestLogger.Info($"RESPONSE={_jsonUtil.Serialize(log)}");
-    }
+#if DEBUG
+    var log = new Response(req.Method, output.Substring(0, Math.Min(output.Length, 2000)));
+    _requestLogger.Info($"RESPONSE={_jsonUtil.Serialize(log)}");
+#endif
   }
 
   public string GetResponse(string sessionID, HttpRequest req, string? body)
@@ -212,16 +199,15 @@ public class SptHttpListener : IHttpListener
     if (string.IsNullOrEmpty(output))
     {
       _logger.Error(_localisationService.GetText("unhandled_response", req.Path.ToString()));
-      _logger.Info(_jsonUtil.Serialize(deserializedObject));
+      _logger.Info(_jsonUtil.Serialize(deserializedObject)!);
       output = _httpResponseUtil.GetBody<object?>(null, BackendErrorCodes.HTTPNotFound, $"UNHANDLED RESPONSE: {req.Path.ToString()}");
     }
 
-    if (ProgramStatics.ENTRY_TYPE() != EntryType.RELEASE)
-    {
-      // Parse quest info into object
-      var log = new Request(req.Method, new RequestData(req.Path, req.Headers, deserializedObject));
-      _requestLogger.Info($"REQUEST={_jsonUtil.Serialize(log)}");
-    }
+#if DEBUG
+    // Parse quest info into object
+    var log = new Request(req.Method, new RequestData(req.Path, req.Headers, deserializedObject));
+    _requestLogger.Info($"REQUEST={_jsonUtil.Serialize(log)}");
+#endif
 
     return output;
   }
@@ -245,9 +231,7 @@ public class SptHttpListener : IHttpListener
     using (var ms = new MemoryStream())
     {
       using (var deflateStream = new ZLibStream(ms, CompressionLevel.SmallestSize))
-      {
-        deflateStream.WriteAsync(Encoding.UTF8.GetBytes(output)).AsTask().Wait();
-      }
+        deflateStream.WriteAsync(Encoding.UTF8.GetBytes(output!)).AsTask().Wait();
 
       var bytes = ms.ToArray();
       resp.Body.WriteAsync(bytes, 0, bytes.Length).Wait();

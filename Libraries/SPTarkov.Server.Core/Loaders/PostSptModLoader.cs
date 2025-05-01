@@ -2,32 +2,29 @@
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.External;
 using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Utils;
 
 namespace SPTarkov.Server.Core.Loaders;
 
 [Injectable(InjectableTypeOverride = typeof(IOnLoad), TypePriority = OnLoadOrder.PostSptModLoader)]
 public class PostSptModLoader(
     ISptLogger<PostSptModLoader> _logger,
-    IEnumerable<IPostSptLoadMod> _postSptLoadMods
+    IEnumerable<IPostSptLoadMod> _postSptLoadMods,
+    ServerSettings _settings
 ) : IOnLoad
 {
   public async Task OnLoad()
   {
-    if (ProgramStatics.Mods)
-    {
-      _logger.Info("Loading PostSptMods...");
-      foreach (var postSptLoadMod in _postSptLoadMods)
-      {
-        postSptLoadMod.PostSptLoad();
-      }
+    if (!_settings.ModsEnabled) return;
 
-      _logger.Info("Finished loading PostSptMods...");
-    }
+    _logger.Info("Loading PostSptMods...");
+
+    foreach (var mod in _postSptLoadMods)
+      mod.PostSptLoad();
+
+    _logger.Info("Finished loading PostSptMods...");
+
+    await Task.CompletedTask;
   }
 
-  public string GetRoute()
-  {
-    return "spt-post-spt-mods";
-  }
+  public string GetRoute() => "spt-post-spt-mods";
 }

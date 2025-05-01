@@ -48,7 +48,7 @@ public class BotController(
   public int GetBotPresetGenerationLimit(string type)
   {
 
-    if (!_botConfig.PresetBatch.TryGetValue(type, out var limit))
+    if (!_botConfig.PresetBatch!.TryGetValue(type, out var limit))
     {
       _logger.Warning(_localisationService.GetText("bot-bot_preset_count_value_missing", type));
 
@@ -199,7 +199,7 @@ public class BotController(
               pmcProfile,
               allPmcsHaveSameNameAsPlayer,
               raidSettings,
-              Math.Max(GetBotPresetGenerationLimit(condition.Role), condition.Limit), // Choose largest between value passed in from request vs what's in bot.config
+              Math.Max(GetBotPresetGenerationLimit(condition.Role!), condition.Limit), // Choose largest between value passed in from request vs what's in bot.config
               _botHelper.IsBotPmc(condition.Role));
 
       result.AddRange(GenerateBotWave(condition, botWaveGenerationDetails, sessionId));
@@ -249,14 +249,14 @@ public class BotController(
 
         // The client expects the Side for PMCs to be `Savage`
         // We do this here so it's after we cache the bot in the match details lookup, as when you die, they will have the right side
-        if (bot.Info.Side is "Bear" or "Usec")
+        if (bot.Info!.Side is "Bear" or "Usec")
         {
           bot.Info.Side = "Savage";
         }
 
         results.Add(bot);
         // Store bot details in cache so post-raid PMC messages can use data
-        _matchBotDetailsCacheService.CacheBot(_cloner.Clone(bot));
+        _matchBotDetailsCacheService.CacheBot(_cloner.Clone(bot)!);
       }
       catch (Exception e)
       {
@@ -298,10 +298,8 @@ public class BotController(
   /// </summary>
   /// <param name="location">Map name e.g. factory4_day</param>
   /// <returns>MinMax values</returns>
-  protected MinMax<int> GetPmcLevelRangeForMap(string? location)
-  {
-    return _pmcConfig.LocationSpecificPmcLevelOverride!.GetValueOrDefault(location?.ToLower() ?? "", null);
-  }
+  protected MinMax<int> GetPmcLevelRangeForMap(string? location) =>
+    _pmcConfig.LocationSpecificPmcLevelOverride!.GetValueOrDefault(location?.ToLower(), null)!;
 
   /// <summary>
   /// Create a BotGenerationDetails for the bot generator to use
@@ -378,23 +376,11 @@ public class BotController(
 public record AiBotBrainTypes
 {
   [JsonPropertyName("pmc")]
-  public Dictionary<string, Dictionary<string, Dictionary<string, double>>> PmcType
-  {
-    get;
-    set;
-  }
+  public required Dictionary<string, GlobalAmmo> PmcType { get; set; }
 
   [JsonPropertyName("assault")]
-  public Dictionary<string, Dictionary<string, int>> Assault
-  {
-    get;
-    set;
-  }
+  public required Dictionary<string, Dictionary<string, int>> Assault { get; set; }
 
   [JsonPropertyName("playerScav")]
-  public Dictionary<string, Dictionary<string, int>> PlayerScav
-  {
-    get;
-    set;
-  }
+  public required Dictionary<string, Dictionary<string, int>> PlayerScav { get; set; }
 }

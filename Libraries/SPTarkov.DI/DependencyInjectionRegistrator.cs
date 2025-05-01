@@ -72,17 +72,10 @@ public static class DependencyInjectionRegistrator
   {
     try
     {
-      _allLoadedTypes ??= AppDomain.CurrentDomain.GetAssemblies().SelectMany(t => t.GetTypes()).ToList();
-    }
-    catch (ReflectionTypeLoadException ex)
-    {
-      Console.WriteLine($"COULD NOT LOAD TYPE: {ex}");
-    }
-    _allConstructors ??= _allLoadedTypes.SelectMany(t => t.GetConstructors()).ToList();
+      _allLoadedTypes = [.. AppDomain.CurrentDomain.GetAssemblies().SelectMany(t => t.GetTypes())];
+      _allConstructors = [.. _allLoadedTypes.SelectMany(t => t.GetConstructors())];
 
-    var typeName = $"{valueTuple.RegistrableInterface.Namespace}.{valueTuple.RegistrableInterface.Name}";
-    try
-    {
+      var typeName = $"{valueTuple.RegistrableInterface.Namespace}.{valueTuple.RegistrableInterface.Name}";
       var matchedConstructors = _allConstructors.Where(
           c => c.GetParameters()
               .Any(
@@ -113,18 +106,17 @@ public static class DependencyInjectionRegistrator
         }
       }
     }
-    catch (Exception e)
+    catch (Exception ex)
     {
-      Console.WriteLine(e);
+      Console.WriteLine($"COULD NOT LOAD TYPE: {ex}");
+      //TODO: log properly, and don't catch and swallow exceptions
       throw;
     }
   }
 
-  static bool IsMatchingGenericType(ParameterInfo paramInfo, string typeName)
-  {
-    return paramInfo.ParameterType.IsGenericType &&
-           paramInfo.ParameterType.GetGenericTypeDefinition().FullName == typeName;
-  }
+  static bool IsMatchingGenericType(ParameterInfo paramInfo, string typeName) =>
+    paramInfo.ParameterType.IsGenericType &&
+    paramInfo.ParameterType.GetGenericTypeDefinition().FullName == typeName;
 
   static void RegisterComponent(
       IServiceCollection builderServices,
@@ -168,19 +160,8 @@ public static class DependencyInjectionRegistrator
 
   sealed class RegistrableType(Type registrableInterface, Type typeToRegister, Injectable injectableAttribute)
   {
-    public Type RegistrableInterface
-    {
-      get;
-    } = registrableInterface;
-
-    public Type TypeToRegister
-    {
-      get;
-    } = typeToRegister;
-
-    public Injectable InjectableAttribute
-    {
-      get;
-    } = injectableAttribute;
+    public Type RegistrableInterface { get; } = registrableInterface;
+    public Type TypeToRegister { get; } = typeToRegister;
+    public Injectable InjectableAttribute { get; } = injectableAttribute;
   }
 }

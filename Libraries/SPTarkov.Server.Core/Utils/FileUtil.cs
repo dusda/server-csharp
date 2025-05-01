@@ -9,14 +9,14 @@ public class FileUtil(
 {
   protected const string _modBasePath = "user/mods/";
 
-  public List<string> GetFiles(string path, bool recursive = false, string searchPattern = "*")
+  public List<string> GetFiles(DirectoryInfo dir, bool recursive = false, string searchPattern = "*")
   {
-    var files = new List<string>(Directory.GetFiles(path, searchPattern));
+    var files = new List<string>();
 
     if (recursive)
-    {
-      files.AddRange(Directory.GetDirectories(path).SelectMany(d => GetFiles(d, recursive, searchPattern)));
-    }
+      files.AddRange(dir.GetFiles(searchPattern, SearchOption.AllDirectories).Select(x => x.FullName));
+    else
+      files.AddRange(dir.GetFiles(searchPattern).Select(x => x.FullName));
 
     return files;
   }
@@ -121,7 +121,7 @@ public class FileUtil(
 
 
     // Ensure dir exists
-    Directory.CreateDirectory(Path.GetDirectoryName(destinationFilePath));
+    Directory.CreateDirectory(Path.GetDirectoryName(destinationFilePath)!);
 
     // Copy the file
     File.Copy(copyFromPath, destinationFilePath, overwrite);

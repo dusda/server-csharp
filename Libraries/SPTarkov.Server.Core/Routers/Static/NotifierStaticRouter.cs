@@ -8,14 +8,12 @@ using SPTarkov.Server.Core.Utils;
 namespace SPTarkov.Server.Core.Routers.Static;
 
 [Injectable(InjectableTypeOverride = typeof(StaticRouter))]
-public class NotifierStaticRouter : StaticRouter
-{
-  public NotifierStaticRouter(
-      JsonUtil jsonUtil,
-      NotifierCallbacks notifierCallbacks
-  ) : base(
-      jsonUtil,
-      [
+public class NotifierStaticRouter(
+    JsonUtil jsonUtil,
+    NotifierCallbacks notifierCallbacks
+  ) : StaticRouter(
+    jsonUtil,
+    [
           new RouteAction(
                 "/client/notifier/channel/create",
                 (
@@ -23,7 +21,7 @@ public class NotifierStaticRouter : StaticRouter
                     info,
                     sessionID,
                     output
-                ) => notifierCallbacks.CreateNotifierChannel(url, info as EmptyRequestData, sessionID)
+                ) => notifierCallbacks.CreateNotifierChannel(url, (info as EmptyRequestData)!, sessionID!)
             ),
             new RouteAction(
                 "/client/game/profile/select",
@@ -32,11 +30,10 @@ public class NotifierStaticRouter : StaticRouter
                     info,
                     sessionID,
                     output
-                ) => notifierCallbacks.SelectProfile(url, info as UIDRequestData, sessionID),
+                ) => notifierCallbacks.SelectProfile(url, (info as UIDRequestData)!, sessionID!),
                 typeof(UIDRequestData)
             )
       ]
   )
-  {
-  }
+{
 }

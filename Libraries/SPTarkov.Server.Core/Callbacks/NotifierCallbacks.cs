@@ -26,7 +26,7 @@ public class NotifierCallbacks(
   /// </summary>
   public void SendNotification(string sessionID, HttpRequest req, HttpResponse resp, object data)
   {
-    var splittedUrl = req.Path.Value.Split("/");
+    var splittedUrl = req.Path.Value!.Split("/");
     var tmpSessionID = splittedUrl[^1].Split("?last_id")[0];
 
     /*

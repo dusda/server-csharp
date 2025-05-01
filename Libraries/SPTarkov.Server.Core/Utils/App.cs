@@ -23,6 +23,7 @@ public class App
   protected ISptLogger<App> _logger;
   protected IEnumerable<IOnLoad> _onLoad;
   protected IEnumerable<IOnUpdate> _onUpdate;
+  protected ServerSettings _settings;
   protected Dictionary<string, long> _onUpdateLastRun = new();
   protected Timer _timer;
   protected TimeUtil _timeUtil;
@@ -37,7 +38,8 @@ public class App
       HttpServer httpServer,
       DatabaseService databaseService,
       IEnumerable<IOnLoad> onLoadComponents,
-      IEnumerable<IOnUpdate> onUpdateComponents
+      IEnumerable<IOnUpdate> onUpdateComponents,
+      ServerSettings settings
   )
   {
     _logger = logger;
@@ -50,6 +52,8 @@ public class App
     _databaseService = databaseService;
     _onLoad = onLoadComponents;
     _onUpdate = onUpdateComponents;
+    _settings = settings;
+    _timer = new Timer(_ => Update(_onUpdate), null, TimeSpan.Zero, TimeSpan.FromMilliseconds(5000));
 
     _coreConfig = configServer.GetConfig<CoreConfig>();
   }
@@ -65,18 +69,18 @@ public class App
       _logger.Debug($"Ran as admin: {Environment.IsPrivilegedProcess}");
       _logger.Debug($"CPU cores: {Environment.ProcessorCount}");
       _logger.Debug($"PATH: {_encodingUtil.ToBase64(Environment.ProcessPath ?? "null returned")}");
-      _logger.Debug($"Server: {ProgramStatics.SPT_VERSION() ?? _coreConfig.SptVersion}");
+      _logger.Debug($"Server: {_settings.SptVersion ?? _coreConfig.SptVersion}");
 
       // _logger.Debug($"RAM: {(os.totalmem() / 1024 / 1024 / 1024).toFixed(2)}GB");
 
-      if (ProgramStatics.BUILD_TIME() is not null)
+      if (_settings.BuildTime is not null)
       {
-        _logger.Debug($"Date: {ProgramStatics.BUILD_TIME()}");
+        _logger.Debug($"Date: {_settings.BuildTime}");
       }
 
-      if (ProgramStatics.COMMIT() is not null)
+      if (_settings.Commit is not null)
       {
-        _logger.Debug($"Commit: {ProgramStatics.COMMIT()}");
+        _logger.Debug($"Commit: {_settings.Commit}");
       }
     }
 
@@ -84,8 +88,6 @@ public class App
     {
       await onLoad.OnLoad();
     }
-
-    _timer = new Timer(_ => Update(_onUpdate), null, TimeSpan.Zero, TimeSpan.FromMilliseconds(5000));
 
     if (_httpServer.IsStarted())
     {

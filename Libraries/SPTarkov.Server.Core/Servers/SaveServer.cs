@@ -65,7 +65,7 @@ public class SaveServer(
       _fileUtil.CreateDirectory(profileFilepath);
     }
 
-    var files = _fileUtil.GetFiles(profileFilepath).Where(item => _fileUtil.GetFileExtension(item) == "json");
+    var files = _fileUtil.GetFiles(new DirectoryInfo(profileFilepath)).Where(item => _fileUtil.GetFileExtension(item) == "json");
 
     // load profiles
     var stopwatch = Stopwatch.StartNew();

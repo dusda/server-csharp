@@ -21,6 +21,8 @@ public class SaveCallbacks(
   {
     _backupService.StartBackupSystem();
     _saveServer.Load();
+
+    await Task.CompletedTask;
   }
 
   public string GetRoute()

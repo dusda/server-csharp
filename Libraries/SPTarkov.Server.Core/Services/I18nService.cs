@@ -40,7 +40,7 @@ public class I18nService
 
   void Initialize()
   {
-    var files = _fileUtil.GetFiles(_directory, true).Where(f => _fileUtil.GetFileExtension(f) == "json").ToList();
+    var files = _fileUtil.GetFiles(new DirectoryInfo(_directory), true).Where(f => _fileUtil.GetFileExtension(f) == "json").ToList();
     if (files.Count == 0)
     {
       throw new Exception($"Localisation files in directory {_directory} not found.");

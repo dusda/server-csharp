@@ -13,7 +13,7 @@ public class ItemEventCallbacks(HttpResponseUtil _httpResponseUtil, ItemEventRou
   {
     var eventResponse = _itemEventRouter.HandleEvents(info, sessionID);
     var result = IsCriticalError(eventResponse.Warnings)
-        ? _httpResponseUtil.GetBody(eventResponse, GetErrorCode(eventResponse.Warnings), eventResponse.Warnings[0].ErrorMessage)
+        ? _httpResponseUtil.GetBody(eventResponse, GetErrorCode(eventResponse.Warnings!), eventResponse.Warnings![0].ErrorMessage)
         : _httpResponseUtil.GetBody(eventResponse);
 
     return result;

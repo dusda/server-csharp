@@ -36,7 +36,7 @@ public class ConfigServer
       throw new Exception($"Config: {configKey} is undefined. Ensure you have not broken it via editing");
     }
 
-    return configs[configKey.GetValue()] as T;
+    return (configs[configKey.GetValue()] as T)!;
   }
 
   ConfigTypes GetConfigKey(Type type)
@@ -52,7 +52,7 @@ public class ConfigServer
 
   public T GetConfigByString<T>(string configType) where T : BaseConfig
   {
-    return configs[configType] as T;
+    return (configs[configType] as T)!;
   }
 
   public void Initialize()
@@ -64,7 +64,7 @@ public class ConfigServer
 
     // Get all filepaths
     const string filepath = "./Assets/configs/";
-    var files = _fileUtil.GetFiles(filepath);
+    var files = _fileUtil.GetFiles(new DirectoryInfo(filepath));
 
     // Add file content to result
     foreach (var file in files)

@@ -16,19 +16,23 @@ public class ModValidator(
     ISemVer semVer,
     ModLoadOrder modLoadOrder,
     JsonUtil jsonUtil,
-    FileUtil fileUtil)
+    FileUtil fileUtil,
+    ServerSettings settings)
 {
   protected readonly string basepath = "user/mods/";
   protected readonly string modOrderPath = "user/mods/order.json";
+  private readonly ServerSettings _settings = settings;
   protected Dictionary<string, int> order = [];
   protected Dictionary<string, SptMod> imported = [];
   protected HashSet<string> skippedMods = [];
 
   protected CoreConfig sptConfig = configServer.GetConfig<CoreConfig>();
 
+  protected StringComparison stringComparison = StringComparison.InvariantCultureIgnoreCase;
+
   public List<SptMod> ValidateAndSort(List<SptMod> mods)
   {
-    if (ProgramStatics.Mods)
+    if (_settings.ModsEnabled)
     {
       ValidateMods(mods);
 
@@ -65,17 +69,15 @@ public class ModValidator(
       logger.Info(localisationService.GetText("modloader-mod_order_missing"));
 
       // Write file with empty order array to disk
-      fileUtil.WriteFile(modOrderPath, jsonUtil.Serialize(new ModOrder
-      {
-        Order = []
-      }));
+      var order = new ModOrder { Order = [] };
+      fileUtil.WriteFile(modOrderPath, jsonUtil.Serialize(order)!);
     }
     else
     {
       var modOrder = File.ReadAllText(modOrderPath);
       try
       {
-        var modOrderArray = jsonUtil.Deserialize<ModOrder>(modOrder).Order;
+        var modOrderArray = jsonUtil.Deserialize<ModOrder>(modOrder)!.Order;
         for (var i = 0; i < modOrderArray.Count; i++)
         {
           order.Add(modOrderArray[i], i);
@@ -221,18 +223,18 @@ public class ModValidator(
   /// <returns>True if compatible</returns>
   protected bool IsModCompatibleWithSpt(PackageJsonData mod)
   {
-    var sptVersion = ProgramStatics.SPT_VERSION() ?? sptConfig.SptVersion;
+    var sptVersion = _settings.SptVersion ?? sptConfig.SptVersion;
     var modName = $"{mod.Author}-{mod.Name}";
 
     // Error and prevent loading if sptVersion property is not a valid semver string
-    if (!(semVer.IsValid(mod.SptVersion) || semVer.IsValidRange(mod.SptVersion)))
+    if (!(semVer.IsValid(mod.SptVersion!) || semVer.IsValidRange(mod.SptVersion!)))
     {
       logger.Error(localisationService.GetText("modloader-invalid_sptversion_field", modName));
       return false;
     }
 
     // Warning and allow loading if semver is not satisfied
-    if (!semVer.Satisfies(sptVersion, mod.SptVersion))
+    if (!semVer.Satisfies(sptVersion, mod.SptVersion!))
     {
       logger.Error(
           localisationService.GetText("modloader-outdated_sptversion_field", new
@@ -258,9 +260,7 @@ public class ModValidator(
     // if loadorder.json exists: load it, otherwise generate load order
     var loadOrderPath = $"{basepath}loadorder.json";
     if (fileUtil.FileExists(loadOrderPath))
-    {
-      return jsonUtil.Deserialize<List<string>>(fileUtil.ReadFile(loadOrderPath));
-    }
+      return jsonUtil.Deserialize<List<string>>(fileUtil.ReadFile(loadOrderPath))!;
 
     return modLoadOrder.GetLoadOrder();
   }
@@ -272,7 +272,7 @@ public class ModValidator(
   protected void AddMod(SptMod mod)
   {
     // Add mod to imported list
-    imported.Add(mod.PackageJson.Name, mod);
+    imported.Add(mod.PackageJson.Name!, mod);
     logger.Info(
         localisationService.GetText("modloader-loaded_mod", new
         {
@@ -318,7 +318,7 @@ public class ModValidator(
         return false;
       }
 
-      if (!semVer.Satisfies(loadedMods[modDependency].Version, requiredVersion))
+      if (!semVer.Satisfies(loadedMods[modDependency].Version!, requiredVersion))
       {
         logger.Error(
             localisationService.GetText("modloader-outdated_dependency", new
@@ -371,13 +371,12 @@ public class ModValidator(
   /// <returns>true if valid</returns>
   protected bool ValidMod(SptMod mod)
   {
-    var modName = mod.PackageJson.Name;
-    var modPath = GetModPath(modName);
+    var modName = mod.PackageJson.Name!;
 
-    var modIsCalledBepinEx = modName.ToLower() == "bepinex";
-    var modIsCalledUser = modName.ToLower() == "user";
-    var modIsCalledSrc = modName.ToLower() == "src";
-    var modIsCalledDb = modName.ToLower() == "db";
+    var modIsCalledBepinEx = modName.Equals("bepinex", stringComparison);
+    var modIsCalledUser = modName.Equals("user", stringComparison);
+    var modIsCalledSrc = modName.Equals("src", stringComparison);
+    var modIsCalledDb = modName.Equals("db", stringComparison);
     var hasBepinExFolderStructure = fileUtil.DirectoryExists($"{mod.Directory}/plugins");
     var containsJs = fileUtil.GetFiles(mod.Directory, true, "*.js").Count > 0;
     var containsTs = fileUtil.GetFiles(mod.Directory, true, "*.ts").Count > 0;
@@ -405,7 +404,7 @@ public class ModValidator(
     var config = mod.PackageJson;
     var issue = false;
 
-    if (!semVer.IsValid(config.Version))
+    if (!semVer.IsValid(config.Version!))
     {
       logger.Error(localisationService.GetText("modloader-invalid_version_property", modName));
       issue = true;

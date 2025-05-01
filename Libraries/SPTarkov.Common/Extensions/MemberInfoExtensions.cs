@@ -7,8 +7,14 @@ public static class MemberInfoExtensions
 {
   public static string GetJsonName(this MemberInfo memberInfo)
   {
-    return Attribute.IsDefined(memberInfo, typeof(JsonPropertyNameAttribute))
-        ? (Attribute.GetCustomAttribute(memberInfo, typeof(JsonPropertyNameAttribute)) as JsonPropertyNameAttribute).Name
-        : memberInfo.Name;
+    var jsonPropertyAttribute = memberInfo.GetCustomAttribute<JsonPropertyNameAttribute>();
+    if (jsonPropertyAttribute != null)
+      return jsonPropertyAttribute.Name;
+
+    var jsonIgnoreAttribute = memberInfo.GetCustomAttribute<JsonIgnoreAttribute>();
+    if (jsonIgnoreAttribute != null)
+      return string.Empty;
+
+    return memberInfo.Name;
   }
 }

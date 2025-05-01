@@ -9,25 +9,23 @@ namespace SPTarkov.Server.Core.Loaders;
 [Injectable(InjectableTypeOverride = typeof(IOnLoad), TypePriority = OnLoadOrder.PostDBModLoader)]
 public class PostDBModLoader(
     ISptLogger<PostDBModLoader> _logger,
-    IEnumerable<IPostDBLoadMod> _postDbLoadMods
+    IEnumerable<IPostDBLoadMod> _postDbLoadMods,
+    ServerSettings _settings
 ) : IOnLoad
 {
   public async Task OnLoad()
   {
-    if (ProgramStatics.Mods)
-    {
-      _logger.Info("Loading PostDBMods...");
-      foreach (var postDbLoadMod in _postDbLoadMods)
-      {
-        postDbLoadMod.PostDBLoad();
-      }
+    if (!_settings.ModsEnabled) return;
 
-      _logger.Info("Finished loading PostDBMods...");
-    }
+    _logger.Info("Loading PostDBMods...");
+
+    foreach (var mod in _postDbLoadMods)
+      mod.PostDBLoad();
+
+    _logger.Info("Finished loading PostDBMods...");
+
+    await Task.CompletedTask;
   }
 
-  public string GetRoute()
-  {
-    return "spt-post-db-mods";
-  }
+  public string GetRoute() => "spt-post-db-mods";
 }

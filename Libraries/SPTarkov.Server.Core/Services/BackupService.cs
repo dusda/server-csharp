@@ -93,7 +93,7 @@ public class BackupService
     List<string> currentProfilePaths;
     try
     {
-      currentProfilePaths = _fileUtil.GetFiles(_profileDir);
+      currentProfilePaths = _fileUtil.GetFiles(new DirectoryInfo(_profileDir));
     }
     catch (Exception ex)
     {

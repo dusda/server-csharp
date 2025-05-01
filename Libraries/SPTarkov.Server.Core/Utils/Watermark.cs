@@ -2,6 +2,7 @@ using SPTarkov.Common.Annotations;
 using SPTarkov.Server;
 using SPTarkov.Server.Core.Models.Logging;
 using SPTarkov.Server.Core.Models.Spt.Config;
+using SPTarkov.Server.Core.Models.Spt.Server;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
@@ -70,6 +71,7 @@ public class Watermark
 
   protected ISptLogger<Watermark> _logger;
   protected WatermarkLocale _watermarkLocale;
+  protected ServerSettings _settings;
   protected CoreConfig sptConfig;
   protected List<string> text = [];
   protected string versionLabel = "";
@@ -78,13 +80,15 @@ public class Watermark
       ISptLogger<Watermark> logger,
       ConfigServer configServer,
       LocalisationService localisationService,
-      WatermarkLocale watermarkLocale
+      WatermarkLocale watermarkLocale,
+      ServerSettings settings
   )
   {
     _logger = logger;
     _configServer = configServer;
     _localisationService = localisationService;
     _watermarkLocale = watermarkLocale;
+    _settings = settings;
     sptConfig = _configServer.GetConfig<CoreConfig>();
   }
 
@@ -101,16 +105,12 @@ public class Watermark
     text = [.. text, .. description];
 
 
-    if (ProgramStatics.DEBUG())
-    {
-      text.AddRange(warning);
-    }
+#if DEBUG
+    text.AddRange(warning);
+#endif
 
-    if (!ProgramStatics.Mods)
-    {
+    if (_settings.ModsEnabled)
       text.AddRange(modding);
-    }
-
 
     if (sptConfig.CustomWatermarkLocaleKeys?.Count > 0)
     {
@@ -131,7 +131,7 @@ public class Watermark
   /// <returns></returns>
   public string GetVersionTag(bool withEftVersion = false)
   {
-    var sptVersion = ProgramStatics.SPT_VERSION() ?? sptConfig.SptVersion;
+    var sptVersion = _settings.SptVersion ?? sptConfig.SptVersion;
     var versionTag = /*ProgramStatics.DEBUG*/ $"{sptVersion} - {_localisationService.GetText("bleeding_edge_build")}";
 
     if (withEftVersion)

@@ -45,26 +45,20 @@ public class AchievementController(
       var percentage = 0;
       foreach (var (profileId, profile) in profiles)
       {
-        if (coreConfig.Features.AchievementProfileIdBlacklist.Contains(profileId))
-        {
+        if (coreConfig.Features.AchievementProfileIdBlacklist!.Contains(profileId))
           continue;
-        }
 
         if (profile.CharacterData?.PmcData?.Achievements is null)
-        {
           continue;
-        }
 
-        if (!profile.CharacterData.PmcData.Achievements.ContainsKey(achievementId))
-        {
+        if (!profile.CharacterData.PmcData.Achievements.ContainsKey(achievementId!))
           continue;
-        }
 
         percentage++;
       }
 
-      percentage = (percentage / profiles.Count) * 100;
-      stats.Add(achievementId, percentage);
+      percentage = percentage / profiles.Count * 100;
+      stats.Add(achievementId!, percentage);
     }
 
     return new CompletedAchievementsResponse { Elements = stats };
