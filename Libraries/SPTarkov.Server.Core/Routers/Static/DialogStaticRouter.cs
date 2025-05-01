@@ -1,23 +1,23 @@
+using SPTarkov.Common.Annotations;
 using SPTarkov.Server.Core.Callbacks;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Request;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Common.Annotations;
 
 namespace SPTarkov.Server.Core.Routers.Static;
 
 [Injectable(InjectableTypeOverride = typeof(StaticRouter))]
 public class DialogStaticRouter : StaticRouter
 {
-    public DialogStaticRouter(
-        JsonUtil jsonUtil,
-        DialogueCallbacks dialogueCallbacks
-    ) : base(
-        jsonUtil,
-        [
-            new RouteAction(
+  public DialogStaticRouter(
+      JsonUtil jsonUtil,
+      DialogueCallbacks dialogueCallbacks
+  ) : base(
+      jsonUtil,
+      [
+          new RouteAction(
                 "/client/chatServer/list",
                 (
                     url,
@@ -273,8 +273,8 @@ public class DialogStaticRouter : StaticRouter
                 ) => dialogueCallbacks.UnIgnoreFriend(url, info as UIDRequestData, sessionID),
                 typeof(UIDRequestData)
             )
-        ]
-    )
-    {
-    }
+      ]
+  )
+  {
+  }
 }

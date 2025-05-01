@@ -1,9 +1,9 @@
+using SPTarkov.Common.Annotations;
 using SPTarkov.Server.Core.Callbacks;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Match;
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Common.Annotations;
 using static SPTarkov.Server.Core.Services.MatchLocationService;
 
 namespace SPTarkov.Server.Core.Routers.Static;
@@ -11,13 +11,13 @@ namespace SPTarkov.Server.Core.Routers.Static;
 [Injectable(InjectableTypeOverride = typeof(StaticRouter))]
 public class MatchStaticRouter : StaticRouter
 {
-    public MatchStaticRouter(
-        JsonUtil jsonUtil,
-        MatchCallbacks matchCallbacks
-    ) : base(
-        jsonUtil,
-        [
-            new RouteAction(
+  public MatchStaticRouter(
+      JsonUtil jsonUtil,
+      MatchCallbacks matchCallbacks
+  ) : base(
+      jsonUtil,
+      [
+          new RouteAction(
                 "/client/match/available",
                 (
                     url,
@@ -285,8 +285,8 @@ public class MatchStaticRouter : StaticRouter
                 ) => matchCallbacks.EndLocalRaid(url, info as EndLocalRaidRequestData, sessionID),
                 typeof(EndLocalRaidRequestData)
             )
-        ]
-    )
-    {
-    }
+      ]
+  )
+  {
+  }
 }

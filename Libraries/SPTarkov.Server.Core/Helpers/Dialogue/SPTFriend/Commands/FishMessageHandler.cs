@@ -1,7 +1,7 @@
+using SPTarkov.Common.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Services;
-using SPTarkov.Common.Annotations;
 
 namespace SPTarkov.Server.Core.Helpers.Dialogue.SPTFriend.Commands;
 
@@ -9,24 +9,24 @@ namespace SPTarkov.Server.Core.Helpers.Dialogue.SPTFriend.Commands;
 public class FishMessageHandler(
     MailSendService _mailSendService) : IChatMessageHandler
 {
-    public int GetPriority()
-    {
-        return 100;
-    }
+  public int GetPriority()
+  {
+    return 100;
+  }
 
-    public bool CanHandle(string message)
-    {
-        return message.ToLower() == "fish";
-    }
+  public bool CanHandle(string message)
+  {
+    return message.ToLower() == "fish";
+  }
 
-    public void Process(string sessionId, UserDialogInfo sptFriendUser, PmcData? sender, object? extraInfo = null)
-    {
-        _mailSendService.SendUserMessageToPlayer(
-            sessionId,
-            sptFriendUser,
-            "blub",
-            [],
-            null
-        );
-    }
+  public void Process(string sessionId, UserDialogInfo sptFriendUser, PmcData? sender, object? extraInfo = null)
+  {
+    _mailSendService.SendUserMessageToPlayer(
+        sessionId,
+        sptFriendUser,
+        "blub",
+        [],
+        null
+    );
+  }
 }

@@ -5,10 +5,10 @@ namespace SPTarkov.Server.Core.Models.Eft.Trade;
 
 public record SellScavItemsToFenceRequestData : InventoryBaseActionRequestData
 {
-    [JsonPropertyName("totalValue")]
-    public double? TotalValue
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("totalValue")]
+  public double? TotalValue
+  {
+    get;
+    set;
+  }
 }

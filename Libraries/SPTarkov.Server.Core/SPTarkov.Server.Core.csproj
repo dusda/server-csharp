@@ -39,19 +39,17 @@
 
   <!--  Generates the ProgramStatics class with the build information -->
   <Target Name="GenerateProgramStatics" BeforeTargets="BeforeBuild">
-    <WriteLinesToFile
-      File="Utils/ProgramStatics.Generated.cs"
-      Lines="
+    <WriteLinesToFile File="Utils/ProgramStatics.Generated.cs" Lines="
 using SPTarkov.Server.Core.Models.Enums%3B
 
 namespace SPTarkov.Server.Core.Utils%3B
 
 public static partial class ProgramStatics
 {
-    private static string? _sptVersion = &quot;$(SptVersion)&quot;%3B
-    private static string? _commit = &quot;$(SptCommit)&quot;%3B
-    private static double? _buildTime = $(SptBuildTime)%3B
-    private static EntryType? BuildType = EntryType.$(SptBuildType)%3B
+    static string? _sptVersion = &quot;$(SptVersion)&quot;%3B
+    static string? _commit = &quot;$(SptCommit)&quot;%3B
+    static double? _buildTime = $(SptBuildTime)%3B
+    static EntryType? BuildType = EntryType.$(SptBuildType)%3B
 }
 " Overwrite="true"/>
   </Target>

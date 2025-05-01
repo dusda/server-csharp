@@ -5,10 +5,10 @@ namespace SPTarkov.Server.Core.Models.Eft.Match;
 
 public record MatchGroupTransferRequest : IRequestData
 {
-    [JsonPropertyName("aidToChange")]
-    public string? AidToChange
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("aidToChange")]
+  public string? AidToChange
+  {
+    get;
+    set;
+  }
 }

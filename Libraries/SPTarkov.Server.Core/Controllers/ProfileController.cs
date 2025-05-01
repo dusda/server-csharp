@@ -1,3 +1,4 @@
+using SPTarkov.Common.Annotations;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -11,7 +12,6 @@ using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
-using SPTarkov.Common.Annotations;
 
 namespace SPTarkov.Server.Core.Controllers;
 
@@ -37,203 +37,203 @@ public class ProfileController(
     ProfileHelper _profileHelper
 )
 {
-    /// <summary>
-    /// Handle /launcher/profiles
-    /// </summary>
-    /// <returns></returns>
-    public virtual List<MiniProfile> GetMiniProfiles()
+  /// <summary>
+  /// Handle /launcher/profiles
+  /// </summary>
+  /// <returns></returns>
+  public virtual List<MiniProfile> GetMiniProfiles()
+  {
+    return _saveServer.GetProfiles().Select(kvp => GetMiniProfile(kvp.Key)).ToList();
+  }
+
+  /// <summary>
+  /// Handle launcher/profile/info
+  /// </summary>
+  /// <param name="sessionID">Session/Player id</param>
+  /// <returns></returns>
+  public virtual MiniProfile GetMiniProfile(string sessionID)
+  {
+    var profile = _saveServer.GetProfile(sessionID);
+    if (profile?.CharacterData == null)
     {
-        return _saveServer.GetProfiles().Select(kvp => GetMiniProfile(kvp.Key)).ToList();
+      throw new Exception($"Unable to find character data for id: {sessionID}. Profile may be corrupt");
     }
 
-    /// <summary>
-    /// Handle launcher/profile/info
-    /// </summary>
-    /// <param name="sessionID">Session/Player id</param>
-    /// <returns></returns>
-    public virtual MiniProfile GetMiniProfile(string sessionID)
+    var pmc = profile.CharacterData.PmcData;
+    var maxLvl = _profileHelper.GetMaxLevel();
+
+    // Player hasn't completed profile creation process, send defaults
+    var currlvl = pmc?.Info?.Level.GetValueOrDefault(1);
+    var xpToNextLevel = _profileHelper.GetExperience((currlvl ?? 1) + 1);
+    if (pmc?.Info?.Level == null)
     {
-        var profile = _saveServer.GetProfile(sessionID);
-        if (profile?.CharacterData == null)
+      return new MiniProfile
+      {
+        Username = profile.ProfileInfo?.Username ?? "",
+        Nickname = "unknown",
+        HasPassword = profile.ProfileInfo.Password != "",
+        Side = "unknown",
+        CurrentLevel = 0,
+        CurrentExperience = 0,
+        PreviousExperience = 0,
+        NextLevel = xpToNextLevel,
+        MaxLevel = maxLvl,
+        Edition = profile.ProfileInfo?.Edition ?? "",
+        ProfileId = profile.ProfileInfo?.ProfileId ?? "",
+        SptData = _profileHelper.GetDefaultSptDataObject()
+      };
+    }
+
+    return new MiniProfile
+    {
+      Username = profile.ProfileInfo.Username,
+      Nickname = pmc.Info.Nickname,
+      HasPassword = profile.ProfileInfo.Password != "",
+      Side = pmc.Info.Side,
+      CurrentLevel = pmc.Info.Level,
+      CurrentExperience = pmc.Info.Experience ?? 0,
+      PreviousExperience = currlvl == 0 ? 0 : _profileHelper.GetExperience(currlvl.Value),
+      NextLevel = xpToNextLevel,
+      MaxLevel = maxLvl,
+      Edition = profile.ProfileInfo?.Edition ?? "",
+      ProfileId = profile.ProfileInfo?.ProfileId ?? "",
+      SptData = profile.SptData
+    };
+  }
+
+  /// <summary>
+  /// Handle client/game/profile/list
+  /// </summary>
+  /// <param name="sessionID">Session/Player id</param>
+  /// <returns>Return a full profile, scav and pmc profiles + meta data</returns>
+  public virtual List<PmcData> GetCompleteProfile(string sessionID)
+  {
+    return _profileHelper.GetCompleteProfile(sessionID);
+  }
+
+  /// <summary>
+  /// Handle client/game/profile/create
+  /// </summary>
+  /// <param name="request">Create profile request</param>
+  /// <param name="sessionID">Player id</param>
+  /// <returns>Player id</returns>
+  public virtual string CreateProfile(ProfileCreateRequestData request, string sessionID)
+  {
+    return _createProfileService.CreateProfile(sessionID, request);
+  }
+
+  /// <summary>
+  /// Generate a player scav object
+  /// PMC profile MUST exist first before player-scav can be generated
+  /// </summary>
+  /// <param name="sessionID">Player id</param>
+  /// <returns>PmcData</returns>
+  public virtual PmcData GeneratePlayerScav(string sessionID)
+  {
+    return _playerScavGenerator.Generate(sessionID);
+  }
+
+  /// <summary>
+  /// Handle client/game/profile/nickname/validate
+  /// </summary>
+  /// <param name="request">Validate nickname request</param>
+  /// <param name="sessionID">Session/Player id</param>
+  /// <returns></returns>
+  public virtual string ValidateNickname(ValidateNicknameRequestData request, string sessionID)
+  {
+    if (request.Nickname.Length < 3)
+    {
+      return "tooshort";
+    }
+
+    if (_profileHelper.IsNicknameTaken(request, sessionID))
+    {
+      return "taken";
+    }
+
+    return "OK";
+  }
+
+  /// <summary>
+  /// Handle client/game/profile/nickname/change event
+  /// Client allows player to adjust their profile name
+  /// </summary>
+  /// <param name="request">Change nickname request</param>
+  /// <param name="sessionID">Player id</param>
+  /// <returns></returns>
+  public virtual string ChangeNickname(ProfileChangeNicknameRequestData request, string sessionID)
+  {
+    var output = ValidateNickname(
+        new ValidateNicknameRequestData
         {
-            throw new Exception($"Unable to find character data for id: {sessionID}. Profile may be corrupt");
-        }
+          Nickname = request.Nickname
+        },
+        sessionID
+    );
 
-        var pmc = profile.CharacterData.PmcData;
-        var maxLvl = _profileHelper.GetMaxLevel();
+    if (output == "OK")
+    {
+      var pmcData = _profileHelper.GetPmcProfile(sessionID);
 
-        // Player hasn't completed profile creation process, send defaults
-        var currlvl = pmc?.Info?.Level.GetValueOrDefault(1);
-        var xpToNextLevel = _profileHelper.GetExperience((currlvl ?? 1) + 1);
-        if (pmc?.Info?.Level == null)
-        {
-            return new MiniProfile
-            {
-                Username = profile.ProfileInfo?.Username ?? "",
-                Nickname = "unknown",
-                HasPassword = profile.ProfileInfo.Password != "",
-                Side = "unknown",
-                CurrentLevel = 0,
-                CurrentExperience = 0,
-                PreviousExperience = 0,
-                NextLevel = xpToNextLevel,
-                MaxLevel = maxLvl,
-                Edition = profile.ProfileInfo?.Edition ?? "",
-                ProfileId = profile.ProfileInfo?.ProfileId ?? "",
-                SptData = _profileHelper.GetDefaultSptDataObject()
-            };
-        }
-
-        return new MiniProfile
-        {
-            Username = profile.ProfileInfo.Username,
-            Nickname = pmc.Info.Nickname,
-            HasPassword = profile.ProfileInfo.Password != "",
-            Side = pmc.Info.Side,
-            CurrentLevel = pmc.Info.Level,
-            CurrentExperience = pmc.Info.Experience ?? 0,
-            PreviousExperience = currlvl == 0 ? 0 : _profileHelper.GetExperience(currlvl.Value),
-            NextLevel = xpToNextLevel,
-            MaxLevel = maxLvl,
-            Edition = profile.ProfileInfo?.Edition ?? "",
-            ProfileId = profile.ProfileInfo?.ProfileId ?? "",
-            SptData = profile.SptData
-        };
+      pmcData.Info.Nickname = request.Nickname;
+      pmcData.Info.LowerNickname = request.Nickname.ToLower();
     }
 
-    /// <summary>
-    /// Handle client/game/profile/list
-    /// </summary>
-    /// <param name="sessionID">Session/Player id</param>
-    /// <returns>Return a full profile, scav and pmc profiles + meta data</returns>
-    public virtual List<PmcData> GetCompleteProfile(string sessionID)
+    return output;
+  }
+
+  /// <summary>
+  /// Handle client/game/profile/voice/change event
+  /// </summary>
+  /// <param name="request">Change voice request</param>
+  /// <param name="sessionID">Player id</param>
+  public virtual void ChangeVoice(ProfileChangeVoiceRequestData request, string sessionID)
+  {
+    var pmcData = _profileHelper.GetPmcProfile(sessionID);
+    pmcData.Info.Voice = request.Voice;
+  }
+
+  /// <summary>
+  /// Handle client/game/profile/search
+  /// </summary>
+  /// <param name="request">Search profiles request</param>
+  /// <param name="sessionID">Player id</param>
+  /// <returns>Found profiles</returns>
+  public virtual List<SearchFriendResponse> SearchProfiles(SearchProfilesRequestData request, string sessionID)
+  {
+    var result = new List<SearchFriendResponse>();
+
+    // Find any profiles with a nickname containing the entered name
+    var allProfiles = _saveServer.GetProfiles().Values;
+
+    foreach (var profile in allProfiles)
     {
-        return _profileHelper.GetCompleteProfile(sessionID);
+      var pmcProfile = profile?.CharacterData?.PmcData;
+      if (!pmcProfile?.Info?.LowerNickname?.Contains(request.Nickname.ToLower()) ?? false)
+      {
+        continue;
+      }
+
+      result.Add(_profileHelper.GetChatRoomMemberFromPmcProfile(pmcProfile));
     }
 
-    /// <summary>
-    /// Handle client/game/profile/create
-    /// </summary>
-    /// <param name="request">Create profile request</param>
-    /// <param name="sessionID">Player id</param>
-    /// <returns>Player id</returns>
-    public virtual string CreateProfile(ProfileCreateRequestData request, string sessionID)
+    return result;
+  }
+
+  /// <summary>
+  /// Handle client/profile/status
+  /// </summary>
+  /// <param name="sessionId">Session/Player id</param>
+  /// <returns></returns>
+  public virtual GetProfileStatusResponseData GetProfileStatus(string sessionId)
+  {
+    var account = _saveServer.GetProfile(sessionId).ProfileInfo;
+    var response = new GetProfileStatusResponseData
     {
-        return _createProfileService.CreateProfile(sessionID, request);
-    }
-
-    /// <summary>
-    /// Generate a player scav object
-    /// PMC profile MUST exist first before player-scav can be generated
-    /// </summary>
-    /// <param name="sessionID">Player id</param>
-    /// <returns>PmcData</returns>
-    public virtual PmcData GeneratePlayerScav(string sessionID)
-    {
-        return _playerScavGenerator.Generate(sessionID);
-    }
-
-    /// <summary>
-    /// Handle client/game/profile/nickname/validate
-    /// </summary>
-    /// <param name="request">Validate nickname request</param>
-    /// <param name="sessionID">Session/Player id</param>
-    /// <returns></returns>
-    public virtual string ValidateNickname(ValidateNicknameRequestData request, string sessionID)
-    {
-        if (request.Nickname.Length < 3)
-        {
-            return "tooshort";
-        }
-
-        if (_profileHelper.IsNicknameTaken(request, sessionID))
-        {
-            return "taken";
-        }
-
-        return "OK";
-    }
-
-    /// <summary>
-    /// Handle client/game/profile/nickname/change event
-    /// Client allows player to adjust their profile name
-    /// </summary>
-    /// <param name="request">Change nickname request</param>
-    /// <param name="sessionID">Player id</param>
-    /// <returns></returns>
-    public virtual string ChangeNickname(ProfileChangeNicknameRequestData request, string sessionID)
-    {
-        var output = ValidateNickname(
-            new ValidateNicknameRequestData
-            {
-                Nickname = request.Nickname
-            },
-            sessionID
-        );
-
-        if (output == "OK")
-        {
-            var pmcData = _profileHelper.GetPmcProfile(sessionID);
-
-            pmcData.Info.Nickname = request.Nickname;
-            pmcData.Info.LowerNickname = request.Nickname.ToLower();
-        }
-
-        return output;
-    }
-
-    /// <summary>
-    /// Handle client/game/profile/voice/change event
-    /// </summary>
-    /// <param name="request">Change voice request</param>
-    /// <param name="sessionID">Player id</param>
-    public virtual void ChangeVoice(ProfileChangeVoiceRequestData request, string sessionID)
-    {
-        var pmcData = _profileHelper.GetPmcProfile(sessionID);
-        pmcData.Info.Voice = request.Voice;
-    }
-
-    /// <summary>
-    /// Handle client/game/profile/search
-    /// </summary>
-    /// <param name="request">Search profiles request</param>
-    /// <param name="sessionID">Player id</param>
-    /// <returns>Found profiles</returns>
-    public virtual List<SearchFriendResponse> SearchProfiles(SearchProfilesRequestData request, string sessionID)
-    {
-        var result = new List<SearchFriendResponse>();
-
-        // Find any profiles with a nickname containing the entered name
-        var allProfiles = _saveServer.GetProfiles().Values;
-
-        foreach (var profile in allProfiles)
-        {
-            var pmcProfile = profile?.CharacterData?.PmcData;
-            if (!pmcProfile?.Info?.LowerNickname?.Contains(request.Nickname.ToLower()) ?? false)
-            {
-                continue;
-            }
-
-            result.Add(_profileHelper.GetChatRoomMemberFromPmcProfile(pmcProfile));
-        }
-
-        return result;
-    }
-
-    /// <summary>
-    /// Handle client/profile/status
-    /// </summary>
-    /// <param name="sessionId">Session/Player id</param>
-    /// <returns></returns>
-    public virtual GetProfileStatusResponseData GetProfileStatus(string sessionId)
-    {
-        var account = _saveServer.GetProfile(sessionId).ProfileInfo;
-        var response = new GetProfileStatusResponseData
-        {
-            MaxPveCountExceeded = false,
-            Profiles =
-            [
-                new ProfileStatusData
+      MaxPveCountExceeded = false,
+      Profiles =
+        [
+            new ProfileStatusData
                 {
                     ProfileId = account.ScavengerId,
                     ProfileToken = null,
@@ -251,51 +251,51 @@ public class ProfileController(
                     Ip = "",
                     Port = 0
                 }
-            ]
-        };
+        ]
+    };
 
-        return response;
+    return response;
+  }
+
+  /// <summary>
+  /// Handle client/profile/view
+  /// </summary>
+  /// <param name="sessionId">Session/Player id</param>
+  /// <param name="request">Get other profile request</param>
+  /// <returns>GetOtherProfileResponse</returns>
+  public virtual GetOtherProfileResponse GetOtherProfile(string sessionId, GetOtherProfileRequest request)
+  {
+    // Find the profile by the account ID, fall back to the current player if we can't find the account
+    var profileToView = _profileHelper.GetFullProfileByAccountId(request.AccountId);
+    if (profileToView?.CharacterData?.PmcData is null || profileToView.CharacterData.ScavData is null)
+    {
+      _logger.Warning($"Unable to get profile: {request.AccountId} to show, falling back to own profile");
+      profileToView = _profileHelper.GetFullProfile(sessionId);
     }
 
-    /// <summary>
-    /// Handle client/profile/view
-    /// </summary>
-    /// <param name="sessionId">Session/Player id</param>
-    /// <param name="request">Get other profile request</param>
-    /// <returns>GetOtherProfileResponse</returns>
-    public virtual GetOtherProfileResponse GetOtherProfile(string sessionId, GetOtherProfileRequest request)
+    var profileToViewPmc = profileToView.CharacterData.PmcData;
+    var profileToViewScav = profileToView.CharacterData.ScavData;
+
+    // Get the keys needed to find profiles hideout-related items
+    var hideoutKeys = new HashSet<string>();
+    hideoutKeys.UnionWith(profileToViewPmc.Inventory.HideoutAreaStashes.Keys);
+    hideoutKeys.Add(profileToViewPmc.Inventory.HideoutCustomizationStashId);
+
+    // Find hideout items e.g. posters
+    var hideoutRootItems = profileToViewPmc.Inventory.Items.Where(x => hideoutKeys.Contains(x.Id));
+    var itemsToReturn = new List<Item>();
+    foreach (var rootItems in hideoutRootItems)
     {
-        // Find the profile by the account ID, fall back to the current player if we can't find the account
-        var profileToView = _profileHelper.GetFullProfileByAccountId(request.AccountId);
-        if (profileToView?.CharacterData?.PmcData is null || profileToView.CharacterData.ScavData is null)
-        {
-            _logger.Warning($"Unable to get profile: {request.AccountId} to show, falling back to own profile");
-            profileToView = _profileHelper.GetFullProfile(sessionId);
-        }
+      // Check each root items for children and add
+      var itemWithChildren = _itemHelper.FindAndReturnChildrenAsItems(profileToViewPmc.Inventory.Items, rootItems.Id);
+      itemsToReturn.AddRange(itemWithChildren);
+    }
 
-        var profileToViewPmc = profileToView.CharacterData.PmcData;
-        var profileToViewScav = profileToView.CharacterData.ScavData;
-
-        // Get the keys needed to find profiles hideout-related items
-        var hideoutKeys = new HashSet<string>();
-        hideoutKeys.UnionWith(profileToViewPmc.Inventory.HideoutAreaStashes.Keys);
-        hideoutKeys.Add(profileToViewPmc.Inventory.HideoutCustomizationStashId);
-
-        // Find hideout items e.g. posters
-        var hideoutRootItems = profileToViewPmc.Inventory.Items.Where(x => hideoutKeys.Contains(x.Id));
-        var itemsToReturn = new List<Item>();
-        foreach (var rootItems in hideoutRootItems)
-        {
-            // Check each root items for children and add
-            var itemWithChildren = _itemHelper.FindAndReturnChildrenAsItems(profileToViewPmc.Inventory.Items, rootItems.Id);
-            itemsToReturn.AddRange(itemWithChildren);
-        }
-
-        return new GetOtherProfileResponse
-        {
-            Id = profileToViewPmc.Id,
-            Aid = profileToViewPmc.Aid,
-            Info =
+    return new GetOtherProfileResponse
+    {
+      Id = profileToViewPmc.Id,
+      Aid = profileToViewPmc.Aid,
+      Info =
             {
                 Nickname = profileToViewPmc.Info.Nickname,
                 Side = profileToViewPmc.Info.Side,
@@ -305,7 +305,7 @@ public class ProfileController(
                 BannedUntil = profileToViewPmc.Info.BannedUntil,
                 RegistrationDate = profileToViewPmc.Info.RegistrationDate
             },
-            Customization =
+      Customization =
             {
                 Head = profileToViewPmc.Customization.Head,
                 Body = profileToViewPmc.Customization.Body,
@@ -313,15 +313,15 @@ public class ProfileController(
                 Hands = profileToViewPmc.Customization.Hands,
                 Dogtag = profileToViewPmc.Customization.DogTag
             },
-            Skills = profileToViewPmc.Skills,
-            Equipment =
+      Skills = profileToViewPmc.Skills,
+      Equipment =
             {
                 Id = profileToViewPmc.Inventory.Equipment,
                 Items = profileToViewPmc.Inventory.Items
             },
-            Achievements = profileToViewPmc.Achievements,
-            FavoriteItems = _profileHelper.GetOtherProfileFavorites(profileToViewPmc),
-            PmcStats =
+      Achievements = profileToViewPmc.Achievements,
+      FavoriteItems = _profileHelper.GetOtherProfileFavorites(profileToViewPmc),
+      PmcStats =
             {
                 Eft =
                 {
@@ -329,7 +329,7 @@ public class ProfileController(
                     OverAllCounters = profileToViewPmc.Stats.Eft.OverallCounters
                 }
             },
-            ScavStats =
+      ScavStats =
             {
                 Eft =
                 {
@@ -337,37 +337,37 @@ public class ProfileController(
                     OverAllCounters = profileToViewScav.Stats.Eft.OverallCounters
                 }
             },
-            Hideout = profileToViewPmc.Hideout,
-            CustomizationStash = profileToViewPmc.Inventory.HideoutCustomizationStashId,
-            HideoutAreaStashes = profileToViewPmc.Inventory.HideoutAreaStashes,
-            Items = itemsToReturn
-        };
-    }
+      Hideout = profileToViewPmc.Hideout,
+      CustomizationStash = profileToViewPmc.Inventory.HideoutCustomizationStashId,
+      HideoutAreaStashes = profileToViewPmc.Inventory.HideoutAreaStashes,
+      Items = itemsToReturn
+    };
+  }
 
-    /// <summary>
-    /// Handle client/profile/settings
-    /// </summary>
-    /// <param name="sessionId">Session/Player id</param>
-    /// <param name="request">Get profile settings request</param>
-    /// <returns></returns>
-    public virtual bool SetChosenProfileIcon(string sessionId, GetProfileSettingsRequest request)
+  /// <summary>
+  /// Handle client/profile/settings
+  /// </summary>
+  /// <param name="sessionId">Session/Player id</param>
+  /// <param name="request">Get profile settings request</param>
+  /// <returns></returns>
+  public virtual bool SetChosenProfileIcon(string sessionId, GetProfileSettingsRequest request)
+  {
+    var profileToUpdate = _profileHelper.GetPmcProfile(sessionId);
+    if (profileToUpdate == null)
     {
-        var profileToUpdate = _profileHelper.GetPmcProfile(sessionId);
-        if (profileToUpdate == null)
-        {
-            return false;
-        }
-
-        if (request.MemberCategory != null)
-        {
-            profileToUpdate.Info.SelectedMemberCategory = request.MemberCategory as MemberCategory?;
-        }
-
-        if (request.SquadInviteRestriction != null)
-        {
-            profileToUpdate.Info.SquadInviteRestriction = request.SquadInviteRestriction;
-        }
-
-        return true;
+      return false;
     }
+
+    if (request.MemberCategory != null)
+    {
+      profileToUpdate.Info.SelectedMemberCategory = request.MemberCategory as MemberCategory?;
+    }
+
+    if (request.SquadInviteRestriction != null)
+    {
+      profileToUpdate.Info.SquadInviteRestriction = request.SquadInviteRestriction;
+    }
+
+    return true;
+  }
 }

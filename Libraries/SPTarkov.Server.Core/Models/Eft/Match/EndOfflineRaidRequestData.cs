@@ -4,31 +4,31 @@ namespace SPTarkov.Server.Core.Models.Eft.Match;
 
 public record EndOfflineRaidRequestData
 {
-    [JsonPropertyName("crc")]
-    public int? Crc
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("crc")]
+  public int? Crc
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("exitStatus")]
-    public string? ExitStatus
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("exitStatus")]
+  public string? ExitStatus
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("exitName")]
-    public string? ExitName
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("exitName")]
+  public string? ExitName
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("raidSeconds")]
-    public int? RaidSeconds
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("raidSeconds")]
+  public int? RaidSeconds
+  {
+    get;
+    set;
+  }
 }

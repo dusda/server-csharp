@@ -1,15 +1,15 @@
-﻿using SPTarkov.Server.Core.Models.Spt.Config;
+﻿using SPTarkov.Common.Annotations;
+using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Servers;
-using SPTarkov.Common.Annotations;
 
 namespace SPTarkov.Server.Core.Helpers;
 
 [Injectable(InjectionType.Singleton)]
 public class HttpServerHelper(ConfigServer configServer)
 {
-    protected HttpConfig _httpConfig = configServer.GetConfig<HttpConfig>();
+  protected HttpConfig _httpConfig = configServer.GetConfig<HttpConfig>();
 
-    protected Dictionary<string, string> mime = new()
+  protected Dictionary<string, string> mime = new()
     {
         { "css", "text/css" },
         { "bin", "application/octet-stream" },
@@ -22,46 +22,46 @@ public class HttpServerHelper(ConfigServer configServer)
         { "txt", "text/plain" }
     };
 
-    public string? GetMimeText(string key)
-    {
-        return mime.GetValueOrDefault(key);
-    }
+  public string? GetMimeText(string key)
+  {
+    return mime.GetValueOrDefault(key);
+  }
 
-    /**
-     * Combine ip and port into address
-     * @returns url
-     */
-    public string BuildUrl()
-    {
-        return $"{_httpConfig.BackendIp}:{_httpConfig.BackendPort}";
-    }
+  /**
+   * Combine ip and port into address
+   * @returns url
+   */
+  public string BuildUrl()
+  {
+    return $"{_httpConfig.BackendIp}:{_httpConfig.BackendPort}";
+  }
 
-    /**
-     * Prepend http to the url:port
-     * @returns URI
-     */
-    public string GetBackendUrl()
-    {
-        return $"https://{BuildUrl()}";
-    }
+  /**
+   * Prepend http to the url:port
+   * @returns URI
+   */
+  public string GetBackendUrl()
+  {
+    return $"https://{BuildUrl()}";
+  }
 
-    /**
-     * Get websocket url + port
-     */
-    public string GetWebsocketUrl()
-    {
-        return $"wss://{BuildUrl()}";
-    }
+  /**
+   * Get websocket url + port
+   */
+  public string GetWebsocketUrl()
+  {
+    return $"wss://{BuildUrl()}";
+  }
 
-    public void SendTextJson(HttpResponse resp, object output)
-    {
-        resp.Headers.Append("Content-Type", mime["json"]);
-        resp.StatusCode = 200;
-        /* TODO: figure this one out
-        resp.writeHead(200, "OK",  {
-            "Content-Type": this.mime.json
-        });
-        resp.end(output);
-        */
-    }
+  public void SendTextJson(HttpResponse resp, object output)
+  {
+    resp.Headers.Append("Content-Type", mime["json"]);
+    resp.StatusCode = 200;
+    /* TODO: figure this one out
+    resp.writeHead(200, "OK",  {
+        "Content-Type": this.mime.json
+    });
+    resp.end(output);
+    */
+  }
 }

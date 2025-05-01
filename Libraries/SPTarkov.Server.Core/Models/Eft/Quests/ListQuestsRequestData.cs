@@ -5,10 +5,10 @@ namespace SPTarkov.Server.Core.Models.Eft.Quests;
 
 public record ListQuestsRequestData : IRequestData
 {
-    [JsonPropertyName("completed")]
-    public bool? Completed
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("completed")]
+  public bool? Completed
+  {
+    get;
+    set;
+  }
 }

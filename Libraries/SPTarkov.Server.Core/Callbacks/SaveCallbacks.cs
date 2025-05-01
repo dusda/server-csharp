@@ -1,8 +1,8 @@
+using SPTarkov.Common.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
-using SPTarkov.Common.Annotations;
 
 namespace SPTarkov.Server.Core.Callbacks;
 
@@ -15,27 +15,27 @@ public class SaveCallbacks(
 )
     : IOnLoad, IOnUpdate
 {
-    private readonly CoreConfig _coreConfig = _configServer.GetConfig<CoreConfig>();
+  readonly CoreConfig _coreConfig = _configServer.GetConfig<CoreConfig>();
 
-    public async Task OnLoad()
+  public async Task OnLoad()
+  {
+    _backupService.StartBackupSystem();
+    _saveServer.Load();
+  }
+
+  public string GetRoute()
+  {
+    return "spt-save";
+  }
+
+  public bool OnUpdate(long timeSinceLastRun)
+  {
+    if (timeSinceLastRun > _coreConfig.ProfileSaveIntervalInSeconds)
     {
-        _backupService.StartBackupSystem();
-        _saveServer.Load();
+      _saveServer.Save();
+      return true;
     }
 
-    public string GetRoute()
-    {
-        return "spt-save";
-    }
-
-    public bool OnUpdate(long timeSinceLastRun)
-    {
-        if (timeSinceLastRun > _coreConfig.ProfileSaveIntervalInSeconds)
-        {
-            _saveServer.Save();
-            return true;
-        }
-
-        return false;
-    }
+    return false;
+  }
 }

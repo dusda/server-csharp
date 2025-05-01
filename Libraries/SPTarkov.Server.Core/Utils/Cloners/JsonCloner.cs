@@ -5,15 +5,15 @@ namespace SPTarkov.Server.Core.Utils.Cloners;
 /// </summary>
 public class JsonCloner : ICloner
 {
-    protected JsonUtil _jsonUtil;
+  protected JsonUtil _jsonUtil;
 
-    public JsonCloner(JsonUtil jsonUtil)
-    {
-        _jsonUtil = jsonUtil;
-    }
+  public JsonCloner(JsonUtil jsonUtil)
+  {
+    _jsonUtil = jsonUtil;
+  }
 
-    public T? Clone<T>(T? obj)
-    {
-        return _jsonUtil.Deserialize<T>(_jsonUtil.Serialize(obj));
-    }
+  public T? Clone<T>(T? obj)
+  {
+    return _jsonUtil.Deserialize<T>(_jsonUtil.Serialize(obj));
+  }
 }

@@ -5,10 +5,10 @@ namespace SPTarkov.Server.Core.Models.Eft.Ragfair;
 
 public record GetMarketPriceRequestData : IRequestData
 {
-    [JsonPropertyName("templateId")]
-    public string? TemplateId
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("templateId")]
+  public string? TemplateId
+  {
+    get;
+    set;
+  }
 }

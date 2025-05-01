@@ -5,10 +5,10 @@ namespace SPTarkov.Server.Core.Models.Eft.PresetBuild;
 
 public record RemoveBuildRequestData : IRequestData
 {
-    [JsonPropertyName("id")]
-    public string? Id
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("id")]
+  public string? Id
+  {
+    get;
+    set;
+  }
 }

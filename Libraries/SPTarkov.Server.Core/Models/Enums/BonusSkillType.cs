@@ -2,9 +2,9 @@
 
 public enum BonusSkillType
 {
-    Physical,
-    Combat,
-    Special,
-    Practical,
-    Mental
+  Physical,
+  Combat,
+  Special,
+  Practical,
+  Mental
 }

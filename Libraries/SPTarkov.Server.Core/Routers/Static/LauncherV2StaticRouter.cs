@@ -1,18 +1,18 @@
-﻿using SPTarkov.Server.Core.Callbacks;
+﻿using SPTarkov.Common.Annotations;
+using SPTarkov.Server.Core.Callbacks;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Launcher;
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Common.Annotations;
 
 namespace SPTarkov.Server.Core.Routers.Static;
 
 [Injectable(InjectableTypeOverride = typeof(StaticRouter))]
 public class LauncherV2StaticRouter : StaticRouter
 {
-    public LauncherV2StaticRouter(LauncherV2Callbacks launcherV2Callbacks, JsonUtil jsonUtil) : base(
-        jsonUtil,
-        [
-            new RouteAction(
+  public LauncherV2StaticRouter(LauncherV2Callbacks launcherV2Callbacks, JsonUtil jsonUtil) : base(
+      jsonUtil,
+      [
+          new RouteAction(
                 "/launcher/v2/ping",
                 (url, _, sessionID, _) => launcherV2Callbacks.Ping()
             ),
@@ -46,7 +46,7 @@ public class LauncherV2StaticRouter : StaticRouter
             ),
             new RouteAction(
                 "/launcher/v2/mods",
-                (url, _, sessionID, _) => launcherV2Callbacks.Mods()
+                (url, _, sessionID, _) => launcherV2Callbacks.Mods
             ),
             new RouteAction(
                 "/launcher/v2/profiles",
@@ -56,8 +56,8 @@ public class LauncherV2StaticRouter : StaticRouter
                 "/launcher/v2/profile",
                 (url, _, sessionID, _) => launcherV2Callbacks.Profile(sessionID)
             )
-        ]
-    )
-    {
-    }
+      ]
+  )
+  {
+  }
 }

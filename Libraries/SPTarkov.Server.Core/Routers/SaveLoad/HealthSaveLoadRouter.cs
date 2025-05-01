@@ -1,36 +1,36 @@
+using SPTarkov.Common.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Profile;
-using SPTarkov.Common.Annotations;
 
 namespace SPTarkov.Server.Core.Routers.SaveLoad;
 
 [Injectable(InjectableTypeOverride = typeof(SaveLoadRouter))]
 public class HealthSaveLoadRouter : SaveLoadRouter
 {
-    protected override List<HandledRoute> GetHandledRoutes()
+  protected override List<HandledRoute> GetHandledRoutes()
+  {
+    return [new HandledRoute("spt-health", false)];
+  }
+
+  public override SptProfile HandleLoad(SptProfile profile)
+  {
+    DefaultVitality(profile.VitalityData);
+
+    return profile;
+  }
+
+  public void DefaultVitality(Vitality? vitality)
+  {
+    vitality ??= new Vitality
     {
-        return [new HandledRoute("spt-health", false)];
-    }
+      Health = null,
+      Energy = 0,
+      Temperature = 0,
+      Hydration = 0
+    };
 
-    public override SptProfile HandleLoad(SptProfile profile)
-    {
-        DefaultVitality(profile.VitalityData);
-
-        return profile;
-    }
-
-    public void DefaultVitality(Vitality? vitality)
-    {
-        vitality ??= new Vitality
-        {
-            Health = null,
-            Energy = 0,
-            Temperature = 0,
-            Hydration = 0
-        };
-
-        vitality.Health = new Dictionary<string, BodyPartHealth>
+    vitality.Health = new Dictionary<string, BodyPartHealth>
         {
             {
                 "Head", new BodyPartHealth
@@ -103,5 +103,5 @@ public class HealthSaveLoadRouter : SaveLoadRouter
                 }
             }
         };
-    }
+  }
 }

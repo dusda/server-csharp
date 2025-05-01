@@ -1,21 +1,21 @@
-﻿using SPTarkov.Server.Core.Callbacks;
+﻿using SPTarkov.Common.Annotations;
+using SPTarkov.Server.Core.Callbacks;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Common.Annotations;
 
 namespace SPTarkov.Server.Core.Routers.Dynamic;
 
 [Injectable(InjectableTypeOverride = typeof(DynamicRouter))]
 public class BotDynamicRouter : DynamicRouter
 {
-    public BotDynamicRouter(
-        JsonUtil jsonUtil,
-        BotCallbacks botCallbacks
-    ) : base(
-        jsonUtil,
-        [
-            new RouteAction(
+  public BotDynamicRouter(
+      JsonUtil jsonUtil,
+      BotCallbacks botCallbacks
+  ) : base(
+      jsonUtil,
+      [
+          new RouteAction(
                 "/singleplayer/settings/bot/limit/",
                 (
                     url,
@@ -60,8 +60,8 @@ public class BotDynamicRouter : DynamicRouter
                     output
                 ) => botCallbacks.GetBotBehaviours()
             )
-        ]
-    )
-    {
-    }
+      ]
+  )
+  {
+  }
 }

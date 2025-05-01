@@ -1,8 +1,8 @@
-﻿using SPTarkov.Server.Core.Controllers;
+﻿using SPTarkov.Common.Annotations;
+using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.Models.Eft.Launcher;
 using SPTarkov.Server.Core.Models.Spt.Launcher;
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Common.Annotations;
 
 namespace SPTarkov.Server.Core.Callbacks;
 
@@ -13,110 +13,110 @@ public class LauncherV2Callbacks(
     ProfileController _profileController
 )
 {
-    public string Ping()
-    {
-        return _httpResponseUtil.NoBody(
-            new LauncherV2PingResponse
-            {
-                Response = _launcherV2Controller.Ping()
-            }
-        );
-    }
+  public string Ping()
+  {
+    return _httpResponseUtil.NoBody(
+        new LauncherV2PingResponse
+        {
+          Response = _launcherV2Controller.Ping()
+        }
+    );
+  }
 
-    public string Types()
-    {
-        return _httpResponseUtil.NoBody(
-            new LauncherV2TypesResponse
-            {
-                Response = _launcherV2Controller.Types()
-            }
-        );
-    }
+  public string Types()
+  {
+    return _httpResponseUtil.NoBody(
+        new LauncherV2TypesResponse
+        {
+          Response = _launcherV2Controller.Types()
+        }
+    );
+  }
 
-    public string Login(LoginRequestData info)
-    {
-        return _httpResponseUtil.NoBody(
-            new LauncherV2LoginResponse
-            {
-                Response = _launcherV2Controller.Login(info)
-            }
-        );
-    }
+  public string Login(LoginRequestData info)
+  {
+    return _httpResponseUtil.NoBody(
+        new LauncherV2LoginResponse
+        {
+          Response = _launcherV2Controller.Login(info)
+        }
+    );
+  }
 
-    public string Register(RegisterData info)
-    {
-        return _httpResponseUtil.NoBody(
-            new LauncherV2RegisterResponse
-            {
-                Response = _launcherV2Controller.Register(info),
-                Profiles = _profileController.GetMiniProfiles()
-            }
-        );
-    }
+  public string Register(RegisterData info)
+  {
+    return _httpResponseUtil.NoBody(
+        new LauncherV2RegisterResponse
+        {
+          Response = _launcherV2Controller.Register(info),
+          Profiles = _profileController.GetMiniProfiles()
+        }
+    );
+  }
 
-    public string PasswordChange(ChangeRequestData info)
-    {
-        return _httpResponseUtil.NoBody(
-            new LauncherV2PasswordChangeResponse
-            {
-                Response = _launcherV2Controller.PasswordChange(info),
-                Profiles = _profileController.GetMiniProfiles()
-            }
-        );
-    }
+  public string PasswordChange(ChangeRequestData info)
+  {
+    return _httpResponseUtil.NoBody(
+        new LauncherV2PasswordChangeResponse
+        {
+          Response = _launcherV2Controller.PasswordChange(info),
+          Profiles = _profileController.GetMiniProfiles()
+        }
+    );
+  }
 
-    public string Remove(LoginRequestData info)
-    {
-        return _httpResponseUtil.NoBody(
-            new LauncherV2RemoveResponse
-            {
-                Response = _launcherV2Controller.Remove(info),
-                Profiles = _profileController.GetMiniProfiles()
-            }
-        );
-    }
+  public string Remove(LoginRequestData info)
+  {
+    return _httpResponseUtil.NoBody(
+        new LauncherV2RemoveResponse
+        {
+          Response = _launcherV2Controller.Remove(info),
+          Profiles = _profileController.GetMiniProfiles()
+        }
+    );
+  }
 
-    public string CompatibleVersion()
-    {
-        return _httpResponseUtil.NoBody(
-            new LauncherV2VersionResponse
-            {
-                Response = new LauncherV2CompatibleVersion
-                {
-                    SptVersion = _launcherV2Controller.SptVersion(),
-                    EftVersion = _launcherV2Controller.EftVersion()
-                }
-            }
-        );
-    }
+  public string CompatibleVersion()
+  {
+    return _httpResponseUtil.NoBody(
+        new LauncherV2VersionResponse
+        {
+          Response = new LauncherV2CompatibleVersion
+          {
+            SptVersion = _launcherV2Controller.SptVersion(),
+            EftVersion = _launcherV2Controller.EftVersion()
+          }
+        }
+    );
+  }
 
-    public string Mods()
-    {
-        return _httpResponseUtil.NoBody(
-            new LauncherV2ModsResponse
-            {
-                Response = _launcherV2Controller.LoadedMods()
-            }
-        );
-    }
+  public string Mods()
+  {
+    return _httpResponseUtil.NoBody(
+        new LauncherV2ModsResponse
+        {
+          Response = _launcherV2Controller.LoadedMods()
+        }
+    );
+  }
 
-    public string Profiles()
-    {
-        return _httpResponseUtil.NoBody(
-            new LauncherV2ProfilesResponse
-            {
-                Response = _profileController.GetMiniProfiles()
-            }
-        );
-    }
+  public string Profiles()
+  {
+    return _httpResponseUtil.NoBody(
+        new LauncherV2ProfilesResponse
+        {
+          Response = _profileController.GetMiniProfiles()
+        }
+    );
+  }
 
-    public object Profile(string? sessionId)
-    {
-        return _httpResponseUtil.NoBody(
-            new LauncherV2ProfileResponse
-            {
-                Response = _launcherV2Controller.GetProfile(sessionId)
-            }
-        );
-    }
+  public object Profile(string? sessionId)
+  {
+    return _httpResponseUtil.NoBody(
+        new LauncherV2ProfileResponse
+        {
+          Response = _launcherV2Controller.GetProfile(sessionId)
+        }
+    );
+  }
 }

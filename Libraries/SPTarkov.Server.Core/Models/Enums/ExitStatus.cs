@@ -2,10 +2,10 @@
 
 public enum ExitStatus
 {
-    SURVIVED,
-    KILLED,
-    LEFT,
-    RUNNER,
-    MISSINGINACTION,
-    TRANSIT
+  SURVIVED,
+  KILLED,
+  LEFT,
+  RUNNER,
+  MISSINGINACTION,
+  TRANSIT
 }

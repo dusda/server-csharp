@@ -1,157 +1,157 @@
+using SPTarkov.Common.Extensions;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Json;
-using SPTarkov.Common.Extensions;
 
 namespace SPTarkov.Server.Core.Services;
 
 public class I18nService
 {
-    private readonly string _defaultLocale;
-    private readonly string _directory;
-    private readonly Dictionary<string, string> _fallbacks;
-    private readonly FileUtil _fileUtil;
-    private readonly JsonUtil _jsonUtil;
-    private readonly LocaleService _localeService;
+  readonly string _defaultLocale;
+  readonly string _directory;
+  readonly Dictionary<string, string> _fallbacks;
+  readonly FileUtil _fileUtil;
+  readonly JsonUtil _jsonUtil;
+  readonly LocaleService _localeService;
 
-    private readonly Dictionary<string, LazyLoad<Dictionary<string, string>>> _loadedLocales = new();
-    private HashSet<string> _locales;
-    private string? _setLocale;
+  readonly Dictionary<string, LazyLoad<Dictionary<string, string>>> _loadedLocales = new();
+  HashSet<string> _locales;
+  string? _setLocale;
 
-    public I18nService(
-        FileUtil fileUtil,
-        JsonUtil jsonUtil,
-        HashSet<string> locales,
-        Dictionary<string, string> fallbacks,
-        string defaultLocale,
-        string directory,
-        LocaleService localeService
-    )
+  public I18nService(
+      FileUtil fileUtil,
+      JsonUtil jsonUtil,
+      HashSet<string> locales,
+      Dictionary<string, string> fallbacks,
+      string defaultLocale,
+      string directory,
+      LocaleService localeService
+  )
+  {
+    _locales = locales;
+    _fallbacks = fallbacks;
+    _defaultLocale = defaultLocale;
+    _directory = directory;
+    _jsonUtil = jsonUtil;
+    _fileUtil = fileUtil;
+    _localeService = localeService;
+
+    Initialize();
+  }
+
+  void Initialize()
+  {
+    var files = _fileUtil.GetFiles(_directory, true).Where(f => _fileUtil.GetFileExtension(f) == "json").ToList();
+    if (files.Count == 0)
     {
-        _locales = locales;
-        _fallbacks = fallbacks;
-        _defaultLocale = defaultLocale;
-        _directory = directory;
-        _jsonUtil = jsonUtil;
-        _fileUtil = fileUtil;
-        _localeService = localeService;
-
-        Initialize();
+      throw new Exception($"Localisation files in directory {_directory} not found.");
     }
 
-    private void Initialize()
+    foreach (var file in files)
     {
-        var files = _fileUtil.GetFiles(_directory, true).Where(f => _fileUtil.GetFileExtension(f) == "json").ToList();
-        if (files.Count == 0)
-        {
-            throw new Exception($"Localisation files in directory {_directory} not found.");
-        }
-
-        foreach (var file in files)
-        {
-            _loadedLocales.Add(
-                _fileUtil.StripExtension(file),
-                new LazyLoad<Dictionary<string, string>>(
-                    () => _jsonUtil.DeserializeFromFile<Dictionary<string, string>>(file) ??
-                          new Dictionary<string, string>()
-                )
-            );
-        }
-
-        if (!_loadedLocales.ContainsKey(_defaultLocale))
-        {
-            throw new Exception($"The default locale '{_defaultLocale}' does not exist on the loaded locales.");
-        }
+      _loadedLocales.Add(
+          _fileUtil.StripExtension(file),
+          new LazyLoad<Dictionary<string, string>>(
+              () => _jsonUtil.DeserializeFromFile<Dictionary<string, string>>(file) ??
+                    new Dictionary<string, string>()
+          )
+      );
     }
 
-    public void SetLocaleByKey(string locale)
+    if (!_loadedLocales.ContainsKey(_defaultLocale))
     {
-        if (_loadedLocales.ContainsKey(locale))
-        {
-            _setLocale = locale;
-        }
-        else
-        {
-            var fallback = _fallbacks.Where(kv => locale.StartsWith(kv.Key.Replace("*", "")));
-            if (fallback.Any())
-            {
-                var foundFallbackLocale = fallback.First().Value;
-                if (!_loadedLocales.ContainsKey(foundFallbackLocale))
-                {
-                    throw new Exception(
-                        $"Locale '{locale}' was not defined, and the found fallback locale did not match any of the loaded locales."
-                    );
-                }
-
-                _setLocale = foundFallbackLocale;
-            }
-
-            _setLocale = _defaultLocale;
-        }
+      throw new Exception($"The default locale '{_defaultLocale}' does not exist on the loaded locales.");
     }
+  }
 
-    public string GetLocalisedValue(string key)
+  public void SetLocaleByKey(string locale)
+  {
+    if (_loadedLocales.ContainsKey(locale))
     {
-        // get loaded locales for set key
-        if (!_loadedLocales.TryGetValue(_setLocale, out var locales))
+      _setLocale = locale;
+    }
+    else
+    {
+      var fallback = _fallbacks.Where(kv => locale.StartsWith(kv.Key.Replace("*", "")));
+      if (fallback.Any())
+      {
+        var foundFallbackLocale = fallback.First().Value;
+        if (!_loadedLocales.ContainsKey(foundFallbackLocale))
         {
-            // if we are unable to get the "loadedLocales" for the set locale, return the key
-            return key;
+          throw new Exception(
+              $"Locale '{locale}' was not defined, and the found fallback locale did not match any of the loaded locales."
+          );
         }
 
-        // searching through loaded locales for given key
-        if (!locales.Value.TryGetValue(key, out var value))
-        {
-            // if the key is not found in loaded locales
-            // check if the key is found in the default locale
-            _loadedLocales.TryGetValue(_defaultLocale, out var defaults);
-            if (!defaults.Value.TryGetValue(key, out value))
-            {
-                value = _localeService.GetLocaleDb(_defaultLocale).FirstOrDefault(x => x.Key == key).Value;
-            }
+        _setLocale = foundFallbackLocale;
+      }
 
-            return value ?? key;
-        }
-
-        // if the key is found in the server locale, return the value
-        return value;
+      _setLocale = _defaultLocale;
     }
+  }
 
-    public string GetLocalised<T>(string key)
+  public string GetLocalisedValue(string key)
+  {
+    // get loaded locales for set key
+    if (!_loadedLocales.TryGetValue(_setLocale, out var locales))
     {
-        return GetLocalisedValue(key);
+      // if we are unable to get the "loadedLocales" for the set locale, return the key
+      return key;
     }
 
-    public string GetLocalised(string key, object? args)
+    // searching through loaded locales for given key
+    if (!locales.Value.TryGetValue(key, out var value))
     {
-        var rawLocalizedString = GetLocalisedValue(key);
-        if (args == null)
-        {
-            return rawLocalizedString;
-        }
+      // if the key is not found in loaded locales
+      // check if the key is found in the default locale
+      _loadedLocales.TryGetValue(_defaultLocale, out var defaults);
+      if (!defaults.Value.TryGetValue(key, out value))
+      {
+        value = _localeService.GetLocaleDb(_defaultLocale).FirstOrDefault(x => x.Key == key).Value;
+      }
 
-        var typeToCheck = args.GetType();
-        var typeProps = typeToCheck.GetProperties();
-
-        foreach (var propertyInfo in args.GetType().GetProperties())
-        {
-            var localizedName = $"{{{{{propertyInfo.GetJsonName()}}}}}";
-            if (rawLocalizedString.Contains(localizedName))
-            {
-                rawLocalizedString = rawLocalizedString.Replace(localizedName, propertyInfo.GetValue(args)?.ToString() ?? string.Empty);
-            }
-        }
-
-        return rawLocalizedString;
+      return value ?? key;
     }
 
-    public string GetLocalised<T>(string key, T? value) where T : IConvertible
+    // if the key is found in the server locale, return the value
+    return value;
+  }
+
+  public string GetLocalised<T>(string key)
+  {
+    return GetLocalisedValue(key);
+  }
+
+  public string GetLocalised(string key, object? args)
+  {
+    var rawLocalizedString = GetLocalisedValue(key);
+    if (args == null)
     {
-        var rawLocalizedString = GetLocalisedValue(key);
-        return rawLocalizedString.Replace("%s", value?.ToString());
+      return rawLocalizedString;
     }
 
-    public List<string> GetLocalisedKeys()
+    var typeToCheck = args.GetType();
+    var typeProps = typeToCheck.GetProperties();
+
+    foreach (var propertyInfo in args.GetType().GetProperties())
     {
-        return _loadedLocales["en"].Value?.Keys.ToList()!;
+      var localizedName = $"{{{{{propertyInfo.GetJsonName()}}}}}";
+      if (rawLocalizedString.Contains(localizedName))
+      {
+        rawLocalizedString = rawLocalizedString.Replace(localizedName, propertyInfo.GetValue(args)?.ToString() ?? string.Empty);
+      }
     }
+
+    return rawLocalizedString;
+  }
+
+  public string GetLocalised<T>(string key, T? value) where T : IConvertible
+  {
+    var rawLocalizedString = GetLocalisedValue(key);
+    return rawLocalizedString.Replace("%s", value?.ToString());
+  }
+
+  public List<string> GetLocalisedKeys()
+  {
+    return _loadedLocales["en"].Value?.Keys.ToList()!;
+  }
 }

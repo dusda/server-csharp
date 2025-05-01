@@ -4,18 +4,18 @@ namespace SPTarkov.Server.Logger;
 
 public class FileFormatter : AbstractFormatter
 {
-    public static FileFormatter Default
-    {
-        get;
-    } = new();
+  public static FileFormatter Default
+  {
+    get;
+  } = new();
 
-    protected override string ProcessText(string message)
+  protected override string ProcessText(string message)
+  {
+    foreach (Match match in Regex.Matches(message, @"\x1b\[[0-9]{1,2}(;[0-1]{1,2}){0,1}m"))
     {
-        foreach (Match match in Regex.Matches(message, @"\x1b\[[0-9]{1,2}(;[0-1]{1,2}){0,1}m"))
-        {
-            message = message.Replace(match.Value, "");
-        }
-
-        return message.Replace("\"", "");
+      message = message.Replace(match.Value, "");
     }
+
+    return message.Replace("\"", "");
+  }
 }

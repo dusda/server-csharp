@@ -5,10 +5,10 @@ namespace SPTarkov.Server.Core.Models.Eft.Dialog;
 
 public record ClearMailMessageRequest : IRequestData
 {
-    [JsonPropertyName("dialogId")]
-    public string? DialogId
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("dialogId")]
+  public string? DialogId
+  {
+    get;
+    set;
+  }
 }

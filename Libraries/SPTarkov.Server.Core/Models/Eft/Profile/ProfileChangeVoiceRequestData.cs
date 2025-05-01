@@ -5,10 +5,10 @@ namespace SPTarkov.Server.Core.Models.Eft.Profile;
 
 public record ProfileChangeVoiceRequestData : IRequestData
 {
-    [JsonPropertyName("voice")]
-    public string? Voice
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("voice")]
+  public string? Voice
+  {
+    get;
+    set;
+  }
 }

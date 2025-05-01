@@ -9,114 +9,114 @@ namespace SPTarkov.Server.Core.DI;
 
 public abstract class Router
 {
-    protected List<HandledRoute> handledRoutes = [];
+  protected List<HandledRoute> handledRoutes = [];
 
-    public virtual string GetTopLevelRoute()
+  public virtual string GetTopLevelRoute()
+  {
+    return "spt";
+  }
+
+  protected abstract List<HandledRoute> GetHandledRoutes();
+
+  protected List<HandledRoute> GetInternalHandledRoutes()
+  {
+    if (handledRoutes.Count == 0)
     {
-        return "spt";
+      handledRoutes = GetHandledRoutes();
     }
 
-    protected abstract List<HandledRoute> GetHandledRoutes();
+    return handledRoutes;
+  }
 
-    protected List<HandledRoute> GetInternalHandledRoutes()
+  public bool CanHandle(string url, bool partialMatch = false)
+  {
+    if (partialMatch)
     {
-        if (handledRoutes.Count == 0)
-        {
-            handledRoutes = GetHandledRoutes();
-        }
-
-        return handledRoutes;
+      return GetInternalHandledRoutes()
+          .Where(r => r.dynamic)
+          .Any(r => url.Contains(r.route));
     }
 
-    public bool CanHandle(string url, bool partialMatch = false)
-    {
-        if (partialMatch)
-        {
-            return GetInternalHandledRoutes()
-                .Where(r => r.dynamic)
-                .Any(r => url.Contains(r.route));
-        }
-
-        return GetInternalHandledRoutes()
-            .Where(r => !r.dynamic)
-            .Any(r => r.route == url);
-    }
+    return GetInternalHandledRoutes()
+        .Where(r => !r.dynamic)
+        .Any(r => r.route == url);
+  }
 }
 
 public abstract class StaticRouter : Router
 {
-    private readonly List<RouteAction> _actions;
-    private readonly JsonUtil _jsonUtil;
+  readonly List<RouteAction> _actions;
+  readonly JsonUtil _jsonUtil;
 
-    public StaticRouter(JsonUtil jsonUtil, List<RouteAction> routes)
+  public StaticRouter(JsonUtil jsonUtil, List<RouteAction> routes)
+  {
+    _actions = routes;
+    _jsonUtil = jsonUtil;
+  }
+
+  public object HandleStatic(string url, string? body, string sessionID, string output)
+  {
+    var action = _actions.Single(route => route.url == url);
+    var type = action.bodyType;
+    IRequestData? info = null;
+    if (type != null && !string.IsNullOrEmpty(body))
     {
-        _actions = routes;
-        _jsonUtil = jsonUtil;
+      info = (IRequestData?) _jsonUtil.Deserialize(body, type);
     }
 
-    public object HandleStatic(string url, string? body, string sessionID, string output)
-    {
-        var action = _actions.Single(route => route.url == url);
-        var type = action.bodyType;
-        IRequestData? info = null;
-        if (type != null && !string.IsNullOrEmpty(body))
-        {
-            info = (IRequestData?) _jsonUtil.Deserialize(body, type);
-        }
+    return action.action(url, info, sessionID, output);
+  }
 
-        return action.action(url, info, sessionID, output);
-    }
-
-    protected override List<HandledRoute> GetHandledRoutes()
-    {
-        return _actions.Select(route => new HandledRoute(route.url, false)).ToList();
-    }
+  protected override List<HandledRoute> GetHandledRoutes()
+  {
+    return _actions.Select(route => new HandledRoute(route.url, false)).ToList();
+  }
 }
 
 public abstract class DynamicRouter : Router
 {
-    private readonly JsonUtil _jsonUtil;
-    private readonly List<RouteAction> actions;
+  readonly JsonUtil _jsonUtil;
+  readonly List<RouteAction> actions;
 
-    public DynamicRouter(JsonUtil jsonUtil, List<RouteAction> routes)
+  public DynamicRouter(JsonUtil jsonUtil, List<RouteAction> routes)
+  {
+    actions = routes;
+    _jsonUtil = jsonUtil;
+  }
+
+  public object HandleDynamic(string url, string? body, string sessionID, string output)
+  {
+    var action = actions.First(r => url.Contains(r.url));
+    var type = action.bodyType;
+    IRequestData? info = null;
+    if (type != null && !string.IsNullOrEmpty(body))
     {
-        actions = routes;
-        _jsonUtil = jsonUtil;
+      info = (IRequestData?) _jsonUtil.Deserialize(body, type);
     }
 
-    public object HandleDynamic(string url, string? body, string sessionID, string output)
-    {
-        var action = actions.First(r => url.Contains(r.url));
-        var type = action.bodyType;
-        IRequestData? info = null;
-        if (type != null && !string.IsNullOrEmpty(body))
-        {
-            info = (IRequestData?) _jsonUtil.Deserialize(body, type);
-        }
+    return action.action(url, info, sessionID, output);
+  }
 
-        return action.action(url, info, sessionID, output);
-    }
-
-    protected override List<HandledRoute> GetHandledRoutes()
-    {
-        return actions.Select(route => new HandledRoute(route.url, true)).ToList();
-    }
+  protected override List<HandledRoute> GetHandledRoutes()
+  {
+    return actions.Select(route => new HandledRoute(route.url, true)).ToList();
+  }
 }
 
 // The name of this class should be ItemEventRouter, but that name is taken,
 // So instead I added the definition
 public abstract class ItemEventRouterDefinition : Router
 {
-    public abstract ItemEventRouterResponse? HandleItemEvent(string url,
-        PmcData pmcData,
-        BaseInteractionRequestData body,
-        string sessionID,
-        ItemEventRouterResponse output);
+  public abstract ItemEventRouterResponse? HandleItemEvent(string url,
+      PmcData pmcData,
+      BaseInteractionRequestData body,
+      string sessionID,
+      ItemEventRouterResponse output);
 }
 
 public abstract class SaveLoadRouter : Router
 {
-    public abstract SptProfile HandleLoad(SptProfile profile);
+  public abstract SptProfile HandleLoad(SptProfile profile);
 }
 
 public record HandledRoute(string route, bool dynamic);

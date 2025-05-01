@@ -2,7 +2,7 @@
 
 public enum DogtagExchangeSide
 {
-    Usec,
-    Bear,
-    Any
+  Usec,
+  Bear,
+  Any
 }

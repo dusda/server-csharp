@@ -4,10 +4,10 @@ namespace SPTarkov.Server.Core.Models.Eft.Launcher;
 
 public record ChangeRequestData : LoginRequestData
 {
-    [JsonPropertyName("change")]
-    public string? Change
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("change")]
+  public string? Change
+  {
+    get;
+    set;
+  }
 }

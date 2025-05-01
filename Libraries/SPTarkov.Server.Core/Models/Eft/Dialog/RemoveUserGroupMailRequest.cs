@@ -5,17 +5,17 @@ namespace SPTarkov.Server.Core.Models.Eft.Dialog;
 
 public record RemoveUserGroupMailRequest : IRequestData
 {
-    [JsonPropertyName("dialogId")]
-    public string? DialogId
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("dialogId")]
+  public string? DialogId
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("uid")]
-    public string? Uid
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("uid")]
+  public string? Uid
+  {
+    get;
+    set;
+  }
 }

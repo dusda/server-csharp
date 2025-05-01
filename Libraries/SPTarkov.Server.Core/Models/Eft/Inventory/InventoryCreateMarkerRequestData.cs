@@ -5,17 +5,17 @@ namespace SPTarkov.Server.Core.Models.Eft.Inventory;
 
 public record InventoryCreateMarkerRequestData : InventoryBaseActionRequestData
 {
-    [JsonPropertyName("item")]
-    public string? Item
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("item")]
+  public string? Item
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("mapMarker")]
-    public MapMarker? MapMarker
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("mapMarker")]
+  public MapMarker? MapMarker
+  {
+    get;
+    set;
+  }
 }

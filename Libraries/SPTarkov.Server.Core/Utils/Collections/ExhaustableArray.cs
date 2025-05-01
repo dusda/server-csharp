@@ -4,71 +4,71 @@ namespace SPTarkov.Server.Core.Utils.Collections;
 
 public record ExhaustableArray<T> : IExhaustableArray<T>
 {
-    private readonly ICloner _cloner;
-    private readonly RandomUtil _randomUtil;
-    private readonly LinkedList<T>? pool;
+  readonly ICloner _cloner;
+  readonly RandomUtil _randomUtil;
+  readonly LinkedList<T>? pool;
 
-    public ExhaustableArray(
-        T[]? itemPool,
-        RandomUtil randomUtil,
-        ICloner cloner
-    ) : this(new LinkedList<T>(itemPool ?? []), randomUtil, cloner)
+  public ExhaustableArray(
+      T[]? itemPool,
+      RandomUtil randomUtil,
+      ICloner cloner
+  ) : this(new LinkedList<T>(itemPool ?? []), randomUtil, cloner)
+  {
+  }
+
+  public ExhaustableArray(
+      LinkedList<T>? itemPool,
+      RandomUtil randomUtil,
+      ICloner cloner
+  )
+  {
+    _cloner = cloner;
+    _randomUtil = randomUtil;
+    pool = cloner.Clone(itemPool ?? []);
+  }
+
+  public ExhaustableArray(
+      ICollection<T>? itemPool,
+      RandomUtil randomUtil,
+      ICloner cloner
+  ) : this(new LinkedList<T>(itemPool ?? []), randomUtil, cloner)
+  {
+  }
+
+  public T? GetRandomValue()
+  {
+    if (pool?.Count == 0)
     {
+      return default;
     }
 
-    public ExhaustableArray(
-        LinkedList<T>? itemPool,
-        RandomUtil randomUtil,
-        ICloner cloner
-    )
+    var index = _randomUtil.GetInt(0, pool.Count - 1);
+    var element = pool.ElementAt(index);
+    pool.Remove(element);
+    return _cloner.Clone(element);
+  }
+
+  public T? GetFirstValue()
+  {
+    if (pool?.Count == 0)
     {
-        _cloner = cloner;
-        _randomUtil = randomUtil;
-        pool = cloner.Clone(itemPool ?? []);
+      return default;
     }
 
-    public ExhaustableArray(
-        ICollection<T>? itemPool,
-        RandomUtil randomUtil,
-        ICloner cloner
-    ) : this(new LinkedList<T>(itemPool ?? []), randomUtil, cloner)
-    {
-    }
+    var element = pool.ElementAt(0);
+    pool.Remove(element);
+    return _cloner.Clone(element);
+  }
 
-    public T? GetRandomValue()
-    {
-        if (pool?.Count == 0)
-        {
-            return default;
-        }
-
-        var index = _randomUtil.GetInt(0, pool.Count - 1);
-        var element = pool.ElementAt(index);
-        pool.Remove(element);
-        return _cloner.Clone(element);
-    }
-
-    public T? GetFirstValue()
-    {
-        if (pool?.Count == 0)
-        {
-            return default;
-        }
-
-        var element = pool.ElementAt(0);
-        pool.Remove(element);
-        return _cloner.Clone(element);
-    }
-
-    public bool HasValues()
-    {
-        return pool?.Count != 0;
-    }
+  public bool HasValues()
+  {
+    return pool?.Count != 0;
+  }
 }
 
 public interface IExhaustableArray<T>
 {
-    T? GetRandomValue();
-    T? GetFirstValue();
-    bool HasValues();
+  T? GetRandomValue();
+  T? GetFirstValue();
+  bool HasValues();
 }

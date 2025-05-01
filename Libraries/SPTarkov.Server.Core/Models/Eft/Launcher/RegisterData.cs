@@ -4,10 +4,10 @@ namespace SPTarkov.Server.Core.Models.Eft.Launcher;
 
 public record RegisterData : LoginRequestData
 {
-    [JsonPropertyName("edition")]
-    public string? Edition
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("edition")]
+  public string? Edition
+  {
+    get;
+    set;
+  }
 }

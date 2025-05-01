@@ -9,7 +9,7 @@ root = true
 [*]
 insert_final_newline = true
 indent_style = space
-indent_size = 4
+indent_size = 2
 trim_trailing_whitespace = true
 
 [*.json]
@@ -73,13 +73,11 @@ dotnet_naming_style.camel_case_underscore_style.capitalization = camel_case
 # Code style defaults
 csharp_using_directive_placement = outside_namespace:error
 dotnet_sort_system_directives_first = true
-csharp_prefer_braces = true:warning
-csharp_preserve_single_line_blocks = false
-csharp_preserve_single_line_statements = false
 csharp_prefer_static_local_function = true:suggestion
 csharp_prefer_simple_using_statement = false:none
 csharp_style_prefer_switch_expression = true:suggestion
 dotnet_style_readonly_field = true:suggestion
+dotnet_style_namespace_match_folder = false:none
 
 # Expression-level preferences
 dotnet_style_object_initializer = true:suggestion
@@ -101,8 +99,6 @@ csharp_style_expression_bodied_constructors = false:warning
 csharp_style_expression_bodied_operators = false:warning
 csharp_style_expression_bodied_properties = false:warning
 csharp_style_expression_bodied_indexers = false:warning
-csharp_style_expression_bodied_accessors = false:warning
-csharp_style_expression_bodied_lambdas = false:warning
 csharp_style_expression_bodied_local_functions = false:warning
 
 # Pattern matching

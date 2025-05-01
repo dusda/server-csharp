@@ -5,10 +5,10 @@ namespace SPTarkov.Server.Core.Models.Eft.Inventory;
 
 public record InventorySortRequestData : InventoryBaseActionRequestData
 {
-    [JsonPropertyName("changedItems")]
-    public List<Item>? ChangedItems
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("changedItems")]
+  public List<Item>? ChangedItems
+  {
+    get;
+    set;
+  }
 }

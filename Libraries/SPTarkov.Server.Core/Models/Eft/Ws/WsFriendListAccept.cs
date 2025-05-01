@@ -5,10 +5,10 @@ namespace SPTarkov.Server.Core.Models.Eft.Ws;
 
 public record WsFriendsListAccept : WsNotificationEvent
 {
-    [JsonPropertyName("profile")]
-    public SearchFriendResponse? Profile
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("profile")]
+  public SearchFriendResponse? Profile
+  {
+    get;
+    set;
+  }
 }

@@ -5,9 +5,9 @@ namespace SPTarkov.Server.Core.Models.Spt.Launcher;
 
 public class LauncherV2ProfileResponse : IRequestData
 {
-    public SptProfile Response
-    {
-        get;
-        set;
-    }
+  public SptProfile Response
+  {
+    get;
+    set;
+  }
 }

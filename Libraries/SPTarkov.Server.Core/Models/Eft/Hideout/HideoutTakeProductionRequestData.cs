@@ -5,17 +5,17 @@ namespace SPTarkov.Server.Core.Models.Eft.Hideout;
 
 public record HideoutTakeProductionRequestData : InventoryBaseActionRequestData
 {
-    [JsonPropertyName("recipeId")]
-    public string? RecipeId
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("recipeId")]
+  public string? RecipeId
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("timestamp")]
-    public int? Timestamp
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("timestamp")]
+  public int? Timestamp
+  {
+    get;
+    set;
+  }
 }

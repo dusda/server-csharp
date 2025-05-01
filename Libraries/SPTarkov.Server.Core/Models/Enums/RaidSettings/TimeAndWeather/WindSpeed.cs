@@ -2,9 +2,9 @@
 
 public enum WindSpeed
 {
-    Light,
-    Moderate,
-    Strong,
-    VeryStrong,
-    Hurricane
+  Light,
+  Moderate,
+  Strong,
+  VeryStrong,
+  Hurricane
 }

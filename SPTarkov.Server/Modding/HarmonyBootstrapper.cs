@@ -6,24 +6,24 @@ namespace SPTarkov.Server.Modding;
 
 public class HarmonyBootstrapper
 {
-    public static void LoadAllPatches(List<Assembly> assemblies)
+  public static void LoadAllPatches(List<Assembly> assemblies)
+  {
+    if (!ProgramStatics.Mods)
     {
-        if (!ProgramStatics.MODS())
-        {
-            return;
-        }
-
-        var hamony = new Harmony("SPT");
-        foreach (var assembly in assemblies)
-        {
-            try
-            {
-                hamony.PatchAll(assembly);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        }
+      return;
     }
+
+    var hamony = new Harmony("SPT");
+    foreach (var assembly in assemblies)
+    {
+      try
+      {
+        hamony.PatchAll(assembly);
+      }
+      catch (Exception e)
+      {
+        Console.WriteLine(e);
+      }
+    }
+  }
 }

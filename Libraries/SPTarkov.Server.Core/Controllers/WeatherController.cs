@@ -1,3 +1,4 @@
+using SPTarkov.Common.Annotations;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Weather;
@@ -7,7 +8,6 @@ using SPTarkov.Server.Core.Models.Spt.Weather;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
-using SPTarkov.Common.Annotations;
 
 namespace SPTarkov.Server.Core.Controllers;
 
@@ -21,45 +21,45 @@ public class WeatherController(
     ConfigServer _configServer
 )
 {
-    protected WeatherConfig _weatherConfig = _configServer.GetConfig<WeatherConfig>();
+  protected WeatherConfig _weatherConfig = _configServer.GetConfig<WeatherConfig>();
 
 
-    /// <summary>
-    ///     Handle client/weather
-    /// </summary>
-    /// <returns>WeatherData</returns>
-    public WeatherData Generate()
+  /// <summary>
+  ///     Handle client/weather
+  /// </summary>
+  /// <returns>WeatherData</returns>
+  public WeatherData Generate()
+  {
+    var result = new WeatherData
     {
-        var result = new WeatherData
-        {
-            Acceleration = 0,
-            Time = "",
-            Date = "",
-            Weather = null,
-            Season = Season.AUTUMN
-        };
+      Acceleration = 0,
+      Time = "",
+      Date = "",
+      Weather = null,
+      Season = Season.AUTUMN
+    };
 
-        _weatherGenerator.CalculateGameTime(result);
-        result.Weather = _weatherGenerator.GenerateWeather(result.Season.Value);
+    _weatherGenerator.CalculateGameTime(result);
+    result.Weather = _weatherGenerator.GenerateWeather(result.Season.Value);
 
-        return result;
-    }
+    return result;
+  }
 
-    /// <summary>
-    ///     Handle client/localGame/weather
-    /// </summary>
-    /// <param name="sessionId">Session/Player id</param>
-    /// <returns>GetLocalWeatherResponseData</returns>
-    public GetLocalWeatherResponseData GenerateLocal(string sessionId)
+  /// <summary>
+  ///     Handle client/localGame/weather
+  /// </summary>
+  /// <param name="sessionId">Session/Player id</param>
+  /// <returns>GetLocalWeatherResponseData</returns>
+  public GetLocalWeatherResponseData GenerateLocal(string sessionId)
+  {
+    var result = new GetLocalWeatherResponseData
     {
-        var result = new GetLocalWeatherResponseData
-        {
-            Season = _seasonalEventService.GetActiveWeatherSeason(),
-            Weather = []
-        };
+      Season = _seasonalEventService.GetActiveWeatherSeason(),
+      Weather = []
+    };
 
-        result.Weather.AddRange(_raidWeatherService.GetUpcomingWeather());
+    result.Weather.AddRange(_raidWeatherService.GetUpcomingWeather());
 
-        return result;
-    }
+    return result;
+  }
 }

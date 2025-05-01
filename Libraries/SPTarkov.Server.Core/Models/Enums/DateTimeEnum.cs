@@ -2,6 +2,6 @@
 
 public enum DateTimeEnum
 {
-    CURR,
-    PAST
+  CURR,
+  PAST
 }

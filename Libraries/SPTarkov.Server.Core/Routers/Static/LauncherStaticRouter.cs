@@ -1,19 +1,19 @@
+using SPTarkov.Common.Annotations;
 using SPTarkov.Server.Core.Callbacks;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Launcher;
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Common.Annotations;
 
 namespace SPTarkov.Server.Core.Routers.Static;
 
 [Injectable(InjectableTypeOverride = typeof(StaticRouter))]
 public class LauncherStaticRouter : StaticRouter
 {
-    public LauncherStaticRouter(LauncherCallbacks launcherCallbacks, JsonUtil jsonUtil) : base(
-        jsonUtil,
-        [
-            new RouteAction(
+  public LauncherStaticRouter(LauncherCallbacks launcherCallbacks, JsonUtil jsonUtil) : base(
+      jsonUtil,
+      [
+          new RouteAction(
                 "/launcher/ping",
                 (url, _, sessionID, _) => launcherCallbacks.Ping(url, null, sessionID)
             ),
@@ -76,8 +76,8 @@ public class LauncherStaticRouter : StaticRouter
                     launcherCallbacks.GetServerModsProfileUsed(url, info as EmptyRequestData, sessionID),
                 typeof(EmptyRequestData)
             )
-        ]
-    )
-    {
-    }
+      ]
+  )
+  {
+  }
 }

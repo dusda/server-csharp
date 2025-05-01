@@ -2,10 +2,10 @@
 
 public enum BotDifficulty
 {
-    AsOnline,
-    Easy,
-    Medium,
-    Hard,
-    Impossible,
-    Random
+  AsOnline,
+  Easy,
+  Medium,
+  Hard,
+  Impossible,
+  Random
 }

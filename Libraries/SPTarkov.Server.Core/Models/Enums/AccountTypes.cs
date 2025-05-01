@@ -2,5 +2,5 @@
 
 public record AccountTypes
 {
-    public const string SPT_DEVELOPER = "spt developer";
+  public const string SPT_DEVELOPER = "spt developer";
 }

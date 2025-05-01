@@ -1,20 +1,20 @@
-﻿using SPTarkov.Server.Core.Callbacks;
+﻿using SPTarkov.Common.Annotations;
+using SPTarkov.Server.Core.Callbacks;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Common.Annotations;
 
 namespace SPTarkov.Server.Core.Routers.Dynamic;
 
 [Injectable(InjectableTypeOverride = typeof(DynamicRouter))]
 public class NotifierDynamicRouter : DynamicRouter
 {
-    public NotifierDynamicRouter(
-        JsonUtil jsonUtil,
-        NotifierCallbacks notifierCallbacks
-    ) : base(
-        jsonUtil,
-        [
-            new RouteAction(
+  public NotifierDynamicRouter(
+      JsonUtil jsonUtil,
+      NotifierCallbacks notifierCallbacks
+  ) : base(
+      jsonUtil,
+      [
+          new RouteAction(
                 "/?last_id",
                 (
                     url,
@@ -50,8 +50,8 @@ public class NotifierDynamicRouter : DynamicRouter
                     _
                 ) => notifierCallbacks.GetNotifier(url, info, sessionID)
             )
-        ]
-    )
-    {
-    }
+      ]
+  )
+  {
+  }
 }

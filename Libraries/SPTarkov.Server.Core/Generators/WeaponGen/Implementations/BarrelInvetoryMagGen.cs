@@ -1,7 +1,7 @@
+using SPTarkov.Common.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Common.Annotations;
 
 namespace SPTarkov.Server.Core.Generators.WeaponGen.Implementations;
 
@@ -11,38 +11,38 @@ public class BarrelInvetoryMagGen(
     BotWeaponGeneratorHelper _botWeaponGeneratorHelper
 ) : InventoryMagGen, IInventoryMagGen
 {
-    public int GetPriority()
+  public int GetPriority()
+  {
+    return 50;
+  }
+
+  public bool CanHandleInventoryMagGen(InventoryMagGen inventoryMagGen)
+  {
+    return inventoryMagGen.GetWeaponTemplate().Properties.ReloadMode == ReloadMode.OnlyBarrel;
+  }
+
+  public void Process(InventoryMagGen inventoryMagGen)
+  {
+    // Can't be done by _props.ammoType as grenade launcher shoots grenades with ammoType of "buckshot"
+    double? randomisedAmmoStackSize;
+    if (inventoryMagGen.GetAmmoTemplate().Properties.StackMaxRandom == 1)
+    // Doesn't stack
     {
-        return 50;
+      randomisedAmmoStackSize = _randomUtil.GetInt(3, 6);
+    }
+    else
+    {
+      randomisedAmmoStackSize = _randomUtil.GetInt(
+          inventoryMagGen.GetAmmoTemplate().Properties.StackMinRandom.Value,
+          inventoryMagGen.GetAmmoTemplate().Properties.StackMaxRandom.Value
+      );
     }
 
-    public bool CanHandleInventoryMagGen(InventoryMagGen inventoryMagGen)
-    {
-        return inventoryMagGen.GetWeaponTemplate().Properties.ReloadMode == ReloadMode.OnlyBarrel;
-    }
-
-    public void Process(InventoryMagGen inventoryMagGen)
-    {
-        // Can't be done by _props.ammoType as grenade launcher shoots grenades with ammoType of "buckshot"
-        double? randomisedAmmoStackSize;
-        if (inventoryMagGen.GetAmmoTemplate().Properties.StackMaxRandom == 1)
-            // Doesn't stack
-        {
-            randomisedAmmoStackSize = _randomUtil.GetInt(3, 6);
-        }
-        else
-        {
-            randomisedAmmoStackSize = _randomUtil.GetInt(
-                inventoryMagGen.GetAmmoTemplate().Properties.StackMinRandom.Value,
-                inventoryMagGen.GetAmmoTemplate().Properties.StackMaxRandom.Value
-            );
-        }
-
-        _botWeaponGeneratorHelper.AddAmmoIntoEquipmentSlots(
-            inventoryMagGen.GetAmmoTemplate().Id,
-            (int) randomisedAmmoStackSize,
-            inventoryMagGen.GetPmcInventory(),
-            null
-        );
-    }
+    _botWeaponGeneratorHelper.AddAmmoIntoEquipmentSlots(
+        inventoryMagGen.GetAmmoTemplate().Id,
+        (int) randomisedAmmoStackSize,
+        inventoryMagGen.GetPmcInventory(),
+        null
+    );
+  }
 }

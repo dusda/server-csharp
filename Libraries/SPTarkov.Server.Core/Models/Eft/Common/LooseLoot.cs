@@ -5,233 +5,233 @@ namespace SPTarkov.Server.Core.Models.Eft.Common;
 
 public record LooseLoot
 {
-    [JsonPropertyName("spawnpointCount")]
-    public SpawnpointCount? SpawnpointCount
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("spawnpointCount")]
+  public SpawnpointCount? SpawnpointCount
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("spawnpointsForced")]
-    public List<Spawnpoint>? SpawnpointsForced
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("spawnpointsForced")]
+  public List<Spawnpoint>? SpawnpointsForced
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("spawnpoints")]
-    public List<Spawnpoint>? Spawnpoints
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("spawnpoints")]
+  public List<Spawnpoint>? Spawnpoints
+  {
+    get;
+    set;
+  }
 }
 
 public record SpawnpointCount
 {
-    [JsonPropertyName("mean")]
-    public double? Mean
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("mean")]
+  public double? Mean
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("std")]
-    public double? Std
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("std")]
+  public double? Std
+  {
+    get;
+    set;
+  }
 }
 
 public record SpawnpointTemplate
 {
-    private string? _root;
+  string? _root;
 
-    [JsonPropertyName("Id")]
-    public string? Id
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("Id")]
+  public string? Id
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("IsContainer")]
-    public bool? IsContainer
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("IsContainer")]
+  public bool? IsContainer
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("useGravity")]
-    public bool? UseGravity
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("useGravity")]
+  public bool? UseGravity
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("randomRotation")]
-    public bool? RandomRotation
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("randomRotation")]
+  public bool? RandomRotation
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("Position")]
-    public XYZ? Position
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("Position")]
+  public XYZ? Position
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("Rotation")]
-    public XYZ? Rotation
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("Rotation")]
+  public XYZ? Rotation
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("IsAlwaysSpawn")]
-    public bool? IsAlwaysSpawn
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("IsAlwaysSpawn")]
+  public bool? IsAlwaysSpawn
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("IsGroupPosition")]
-    public bool? IsGroupPosition
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("IsGroupPosition")]
+  public bool? IsGroupPosition
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("GroupPositions")]
-    public List<GroupPosition>? GroupPositions
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("GroupPositions")]
+  public List<GroupPosition>? GroupPositions
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("Root")]
-    public string? Root
+  [JsonPropertyName("Root")]
+  public string? Root
+  {
+    get
     {
-        get
-        {
-            return _root;
-        }
-        set
-        {
-            _root = value == null ? null : string.Intern(value);
-        }
+      return _root;
     }
+    set
+    {
+      _root = value == null ? null : string.Intern(value);
+    }
+  }
 
-    [JsonPropertyName("Items")]
-    public List<Item>? Items
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("Items")]
+  public List<Item>? Items
+  {
+    get;
+    set;
+  }
 }
 
 public record GroupPosition
 {
-    private string? _name;
+  string? _name;
 
-    [JsonPropertyName("Name")]
-    public string? Name
+  [JsonPropertyName("Name")]
+  public string? Name
+  {
+    get
     {
-        get
-        {
-            return _name;
-        }
-        set
-        {
-            _name = value == null ? null : string.Intern(value);
-        }
+      return _name;
     }
+    set
+    {
+      _name = value == null ? null : string.Intern(value);
+    }
+  }
 
-    [JsonPropertyName("Weight")]
-    public double? Weight
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("Weight")]
+  public double? Weight
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("Position")]
-    public XYZ? Position
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("Position")]
+  public XYZ? Position
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("Rotation")]
-    public XYZ? Rotation
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("Rotation")]
+  public XYZ? Rotation
+  {
+    get;
+    set;
+  }
 }
 
 public record Spawnpoint
 {
-    [JsonPropertyName("locationId")]
-    public string? LocationId
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("locationId")]
+  public string? LocationId
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("probability")]
-    public double? Probability
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("probability")]
+  public double? Probability
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("template")]
-    public SpawnpointTemplate? Template
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("template")]
+  public SpawnpointTemplate? Template
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("itemDistribution")]
-    public List<LooseLootItemDistribution>? ItemDistribution
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("itemDistribution")]
+  public List<LooseLootItemDistribution>? ItemDistribution
+  {
+    get;
+    set;
+  }
 }
 
 public record LooseLootItemDistribution
 {
-    [JsonPropertyName("composedKey")]
-    public ComposedKey? ComposedKey
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("composedKey")]
+  public ComposedKey? ComposedKey
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("relativeProbability")]
-    public double? RelativeProbability
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("relativeProbability")]
+  public double? RelativeProbability
+  {
+    get;
+    set;
+  }
 }
 
 public record ComposedKey
 {
-    private string? _key;
-    [JsonPropertyName("key")]
-    public string? Key
+  string? _key;
+  [JsonPropertyName("key")]
+  public string? Key
+  {
+    get
     {
-        get
-        {
-            return _key;
-        }
-        set
-        {
-            _key = string.Intern(value);
-        }
+      return _key;
     }
+    set
+    {
+      _key = string.Intern(value);
+    }
+  }
 }

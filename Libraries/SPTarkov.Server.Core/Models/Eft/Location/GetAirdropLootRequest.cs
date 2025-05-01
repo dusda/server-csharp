@@ -5,10 +5,10 @@ namespace SPTarkov.Server.Core.Models.Eft.Location;
 
 public record GetAirdropLootRequest : IRequestData
 {
-    [JsonPropertyName("containerId")]
-    public string? ContainerId
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("containerId")]
+  public string? ContainerId
+  {
+    get;
+    set;
+  }
 }

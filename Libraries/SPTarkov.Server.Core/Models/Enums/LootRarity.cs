@@ -2,8 +2,8 @@ namespace SPTarkov.Server.Core.Models.Enums;
 
 public enum LootRarity
 {
-    Not_exist = -1,
-    Common,
-    Rare,
-    Superrare
+  Not_exist = -1,
+  Common,
+  Rare,
+  Superrare
 }

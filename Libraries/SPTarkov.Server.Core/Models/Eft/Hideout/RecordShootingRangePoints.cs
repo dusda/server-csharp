@@ -5,10 +5,10 @@ namespace SPTarkov.Server.Core.Models.Eft.Hideout;
 
 public record RecordShootingRangePoints : InventoryBaseActionRequestData
 {
-    [JsonPropertyName("points")]
-    public int? Points
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("points")]
+  public int? Points
+  {
+    get;
+    set;
+  }
 }

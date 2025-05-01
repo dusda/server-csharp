@@ -5,10 +5,10 @@ namespace SPTarkov.Server.Core.Models.Eft.Dialog;
 
 public record GetChatServerListRequestData : IRequestData
 {
-    [JsonPropertyName("VersionId")]
-    public string? VersionId
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("VersionId")]
+  public string? VersionId
+  {
+    get;
+    set;
+  }
 }

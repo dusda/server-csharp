@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using SPTarkov.Common.Annotations;
 using SPTarkov.Server.Core.Helpers.Dialog.Commando.SptCommands;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
@@ -8,7 +9,6 @@ using SPTarkov.Server.Core.Models.Spt.Dialog;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Common.Annotations;
 
 namespace SPTarkov.Server.Core.Helpers.Dialogue.Commando.SptCommands.TraderCommand;
 
@@ -19,78 +19,78 @@ public class TraderSptCommand(
     TraderHelper _traderHelper,
     MailSendService _mailSendService) : ISptCommand
 {
-    protected Regex _commandRegex = new(
-        @"^spt trader (?<trader>[\w]+) (?<command>rep|spend) (?<quantity>(?!0+)[0-9]+)$"
-    );
+  protected Regex _commandRegex = new(
+      @"^spt trader (?<trader>[\w]+) (?<command>rep|spend) (?<quantity>(?!0+)[0-9]+)$"
+  );
 
-    public string GetCommand()
+  public string GetCommand()
+  {
+    return "trader";
+  }
+
+  public string GetCommandHelp()
+  {
+    return
+        "spt trader\n========\nSets the reputation or money spent to the input quantity through the message system.\n\n\tspt trader [trader] rep [quantity]\n\t\tEx: spt trader prapor rep 2\n\n\tspt trader [trader] spend [quantity]\n\t\tEx: spt trader therapist spend 1000000";
+  }
+
+  public string PerformAction(UserDialogInfo commandHandler, string sessionId, SendMessageRequest request)
+  {
+    if (!_commandRegex.IsMatch(request.Text))
     {
-        return "trader";
+      _mailSendService.SendUserMessageToPlayer(
+          sessionId,
+          commandHandler,
+          "Invalid use of trader command. Use 'help' for more information."
+      );
+      return request.DialogId;
     }
 
-    public string GetCommandHelp()
+    var result = _commandRegex.Match(request.Text);
+
+    var trader = result.Groups["trader"].Captures[0].Value;
+    var command = result.Groups["command"].Captures[0].Value;
+    var quantity = int.Parse(result.Groups["quantity"].Captures[0].Value);
+
+    var dbTrader = _traderHelper.GetTrader(trader, sessionId);
+    if (dbTrader == null)
     {
-        return
-            "spt trader\n========\nSets the reputation or money spent to the input quantity through the message system.\n\n\tspt trader [trader] rep [quantity]\n\t\tEx: spt trader prapor rep 2\n\n\tspt trader [trader] spend [quantity]\n\t\tEx: spt trader therapist spend 1000000";
+      _mailSendService.SendUserMessageToPlayer(
+          sessionId,
+          commandHandler,
+          "Invalid use of trader command, the trader was not found. Use 'help' for more information."
+      );
+
+      return request.DialogId;
     }
 
-    public string PerformAction(UserDialogInfo commandHandler, string sessionId, SendMessageRequest request)
+    ProfileChangeEventType profileChangeEventType;
+    switch (command)
     {
-        if (!_commandRegex.IsMatch(request.Text))
+      case "rep":
+        quantity /= 100;
+        profileChangeEventType = ProfileChangeEventType.TraderStanding;
+        break;
+      case "spend":
+        profileChangeEventType = ProfileChangeEventType.TraderSalesSum;
+        break;
+      default:
         {
-            _mailSendService.SendUserMessageToPlayer(
-                sessionId,
-                commandHandler,
-                "Invalid use of trader command. Use 'help' for more information."
-            );
-            return request.DialogId;
+          _mailSendService.SendUserMessageToPlayer(
+              sessionId,
+              commandHandler,
+              "Invalid use of trader command, ProfileChangeEventType was not found. Use 'help' for more information."
+          );
+
+          return request.DialogId;
         }
+    }
 
-        var result = _commandRegex.Match(request.Text);
-
-        var trader = result.Groups["trader"].Captures[0].Value;
-        var command = result.Groups["command"].Captures[0].Value;
-        var quantity = int.Parse(result.Groups["quantity"].Captures[0].Value);
-
-        var dbTrader = _traderHelper.GetTrader(trader, sessionId);
-        if (dbTrader == null)
-        {
-            _mailSendService.SendUserMessageToPlayer(
-                sessionId,
-                commandHandler,
-                "Invalid use of trader command, the trader was not found. Use 'help' for more information."
-            );
-
-            return request.DialogId;
-        }
-
-        ProfileChangeEventType profileChangeEventType;
-        switch (command)
-        {
-            case "rep":
-                quantity /= 100;
-                profileChangeEventType = ProfileChangeEventType.TraderStanding;
-                break;
-            case "spend":
-                profileChangeEventType = ProfileChangeEventType.TraderSalesSum;
-                break;
-            default:
-                {
-                    _mailSendService.SendUserMessageToPlayer(
-                        sessionId,
-                        commandHandler,
-                        "Invalid use of trader command, ProfileChangeEventType was not found. Use 'help' for more information."
-                    );
-
-                    return request.DialogId;
-                }
-        }
-
-        _mailSendService.SendSystemMessageToPlayer(
-            sessionId,
-            "A single ruble is being attached, required by BSG logic.",
-            [
-                new Item
+    _mailSendService.SendSystemMessageToPlayer(
+        sessionId,
+        "A single ruble is being attached, required by BSG logic.",
+        [
+            new Item
                 {
                     Id = _hashUtil.Generate(),
                     Template = Money.ROUBLES,
@@ -101,22 +101,22 @@ public class TraderSptCommand(
                     ParentId = _hashUtil.Generate(),
                     SlotId = "main"
                 }
-            ],
-            999999,
-            [CreateProfileChangeEvent(profileChangeEventType, quantity, dbTrader.Id)]
-        );
+        ],
+        999999,
+        [CreateProfileChangeEvent(profileChangeEventType, quantity, dbTrader.Id)]
+    );
 
-        return request.DialogId;
-    }
+    return request.DialogId;
+  }
 
-    protected ProfileChangeEvent CreateProfileChangeEvent(ProfileChangeEventType profileChangeEventType, int quantity, string dbTraderId)
+  protected ProfileChangeEvent CreateProfileChangeEvent(ProfileChangeEventType profileChangeEventType, int quantity, string dbTraderId)
+  {
+    return new ProfileChangeEvent
     {
-        return new ProfileChangeEvent
-        {
-            Id = _hashUtil.Generate(),
-            Type = profileChangeEventType,
-            Value = quantity,
-            Entity = dbTraderId
-        };
-    }
+      Id = _hashUtil.Generate(),
+      Type = profileChangeEventType,
+      Value = quantity,
+      Entity = dbTraderId
+    };
+  }
 }

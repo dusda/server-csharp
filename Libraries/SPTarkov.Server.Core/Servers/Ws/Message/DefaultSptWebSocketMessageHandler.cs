@@ -1,7 +1,7 @@
 using System.Net.WebSockets;
 using System.Text;
-using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Common.Annotations;
+using SPTarkov.Server.Core.Models.Utils;
 
 namespace SPTarkov.Server.Core.Servers.Ws.Message;
 
@@ -10,8 +10,8 @@ public class DefaultSptWebSocketMessageHandler(
     ISptLogger<DefaultSptWebSocketMessageHandler> _logger
 ) : ISptWebSocketMessageHandler
 {
-    public async Task OnSptMessage(string sessionID, WebSocket client, byte[] rawData)
-    {
-        _logger.Debug($"[{sessionID}] SPT message received: {Encoding.UTF8.GetString(rawData)}");
-    }
+  public async Task OnSptMessage(string sessionID, WebSocket client, byte[] rawData)
+  {
+    _logger.Debug($"[{sessionID}] SPT message received: {Encoding.UTF8.GetString(rawData)}");
+  }
 }

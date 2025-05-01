@@ -2,29 +2,29 @@ namespace SPTarkov.Server.Core.Utils.Json;
 
 public class DictionaryOrList<K, V>(Dictionary<K, V>? dictionary, List<V>? list)
 {
-    public Dictionary<K, V>? Dictionary
-    {
-        get;
-    } = dictionary;
+  public Dictionary<K, V>? Dictionary
+  {
+    get;
+  } = dictionary;
 
-    public List<V>? List
-    {
-        get;
-    } = list;
+  public List<V>? List
+  {
+    get;
+  } = list;
 
-    public bool IsList
+  public bool IsList
+  {
+    get
     {
-        get
-        {
-            return List != null;
-        }
+      return List != null;
     }
+  }
 
-    public bool IsDictionary
+  public bool IsDictionary
+  {
+    get
     {
-        get
-        {
-            return Dictionary != null;
-        }
+      return Dictionary != null;
     }
+  }
 }

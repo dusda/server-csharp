@@ -5,17 +5,17 @@ namespace SPTarkov.Server.Core.Models.Eft.Trade;
 
 public record ProcessBaseTradeRequestData : InventoryBaseActionRequestData
 {
-    [JsonPropertyName("type")]
-    public string? Type
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("type")]
+  public string? Type
+  {
+    get;
+    set;
+  }
 
-    [JsonPropertyName("tid")]
-    public string? TransactionId
-    {
-        get;
-        set;
-    }
+  [JsonPropertyName("tid")]
+  public string? TransactionId
+  {
+    get;
+    set;
+  }
 }
